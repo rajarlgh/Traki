@@ -8,6 +8,9 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseMaui>true</UseMaui>
+    <!-- Use singular RuntimeIdentifier instead of plural RuntimeIdentifiers -->
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+    <!-- Only target real devices -->
   </PropertyGroup>
 
   <ItemGroup>
