@@ -1,0 +1,14 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Traki/Traki/Traki/obj
+/Traki/Traki/Traki.Droid/obj
+/Traki/Traki/Traki.iOS/obj
+/Traki/Traki/Traki.Mac/obj
+/Traki/Traki/Traki.WinUI/obj
+/Traki/.vs/Traki/FileContentIndex/17fdd2f3-0b11-42d2-ae0b-4ee78615462d.vsidx
+/Traki/.vs/Traki/FileContentIndex/8d993536-263b-4b08-84d8-beae4a0bdab7.vsidx
+/Traki/.vs/Traki/FileContentIndex/ceddc2f0-4ea9-48da-944d-61ffa16301dc.vsidx
+/Traki/.vs/Traki/FileContentIndex/ff33d140-6321-4910-8036-c53afeec102d.vsidx
+/Traki/.vs/Traki/FileContentIndex/ffd07e0d-87a6-443b-872f-491f46ce56b6.vsidx
