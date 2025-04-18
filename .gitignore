@@ -31,3 +31,5 @@
 /Traki/.vs/Traki/v17/DocumentLayout.backup.json
 /Traki/.vs/Traki/v17/DocumentLayout.json
 *.vsidx
+/Traki/TrakiLibrary/bin/Debug
+/Traki/TrakiLibrary/obj

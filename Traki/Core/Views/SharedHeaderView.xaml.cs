@@ -1,4 +1,4 @@
-namespace Core.View;
+namespace Core.Views;
 
 public partial class SharedHeaderView : ContentView
 {
