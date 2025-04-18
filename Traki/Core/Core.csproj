@@ -24,17 +24,13 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 	</ItemGroup>
- 
-	<ItemGroup>
-	  <MauiXaml Update="Views\SharedHeaderView.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>
+
+
 
 	<ItemGroup>
-	  <None Update="Views\SharedHeaderView.xaml">
+	  <MauiXaml Update="View\SharedHeaderView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
-	  </None>
+	  </MauiXaml>
 	</ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Traki.Pages.DashboardPage"
-             xmlns:coreControls="clr-namespace:Core.Views;assembly=Core"
+             xmlns:coreControls="clr-namespace:Core.View;assembly=Core"
              
              Title="Dashboard Page">
     <VerticalStackLayout>

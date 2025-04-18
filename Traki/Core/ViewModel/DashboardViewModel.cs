@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Core.ViewModels
+namespace Core.ViewModel
 {
     public partial class DashboardViewModel : ObservableObject
     {
