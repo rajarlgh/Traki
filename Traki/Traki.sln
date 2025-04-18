@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traki", "Traki\Traki\Traki.csproj", "{B8A0AB47-44CB-4DF1-8427-36FFE01B4EDE}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traki.Mac", "Traki\Traki.Mac\Traki.Mac.csproj", "{4E6C8611-2788-4AC8-8A7E-7118EC21A60B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traki.WinUI", "Traki\Traki.WinUI\Traki.WinUI.csproj", "{7B61B0BD-3F29-4877-9458-AFD20B3D4C08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{B3B5C3D4-BD42-42BB-907A-88D14DBD72B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{7B61B0BD-3F29-4877-9458-AFD20B3D4C08}.Debug|Any CPU.Build.0 = Debug|x64
 		{7B61B0BD-3F29-4877-9458-AFD20B3D4C08}.Release|Any CPU.ActiveCfg = Release|x64
 		{7B61B0BD-3F29-4877-9458-AFD20B3D4C08}.Release|Any CPU.Build.0 = Release|x64
+		{B3B5C3D4-BD42-42BB-907A-88D14DBD72B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3B5C3D4-BD42-42BB-907A-88D14DBD72B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3B5C3D4-BD42-42BB-907A-88D14DBD72B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3B5C3D4-BD42-42BB-907A-88D14DBD72B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Traki.Pages.DashboardPage"
+             xmlns:coreControls="clr-namespace:Core.Views;assembly=Core"
+             
+             Title="Dashboard Page">
+    <VerticalStackLayout>
+
+        <!-- Shared Header -->
+        <coreControls:SharedHeaderView> </coreControls:SharedHeaderView >
+
+         <!--Tab Buttons--> 
+        <HorizontalStackLayout Padding="10" Spacing="10" HorizontalOptions="Center">
+            <Button Text="Income" Command="{Binding ShowIncomeCommand}" />
+            <Button Text="Expense" Command="{Binding ShowExpenseCommand}" />
+            <Button Text="Breakdown" Command="{Binding ShowBreakdownCommand}" />
+            <Button Text="Transactions" Command="{Binding ShowTransactionsCommand}" />
+        </HorizontalStackLayout>
+
+        <!-- Tab Content Area -->
+        <ContentView Content="{Binding SelectedTabView}" />
+
+    </VerticalStackLayout>
+</ContentPage>
