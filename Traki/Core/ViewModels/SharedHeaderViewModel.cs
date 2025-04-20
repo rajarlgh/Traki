@@ -85,17 +85,21 @@ namespace Core.ViewModels
         private readonly IAccountService? _accountService;
         #endregion DB
 
-        [RelayCommand]
-        private void ToggleFilter()
-        {
-            IsFilterExpanded = !IsFilterExpanded;
-        }
-
+        #region Constructor
         public SharedHeaderViewModel(string dbPath, IAccountService accountService)
         {
             this._accountService = accountService;
             _database = new SQLiteAsyncConnection(dbPath);
         }
+        #endregion Constructor
+
+        [RelayCommand]
+        private async Task ToggleFilter()
+        {
+            IsFilterExpanded = !IsFilterExpanded;
+            await this.LoadAccountsAsync(0);
+        }
+
         public async Task LoadAccountsAsync(int accountId)
         {
             if (_accountService != null)
