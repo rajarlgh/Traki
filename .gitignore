@@ -33,3 +33,5 @@
 *.vsidx
 /Traki/TrakiLibrary/bin/Debug
 /Traki/TrakiLibrary/obj
+/Traki/Traki.Service/bin/Debug
+/Traki/Traki.Service/obj

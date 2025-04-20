@@ -23,9 +23,9 @@ namespace Core.ViewModels
         [ObservableProperty]
         private bool isFilterExpanded = false;
         [ObservableProperty]
-        private ObservableCollection<Account> listOfAccounts;
+        private ObservableCollection<Account>? listOfAccounts = new();
         [ObservableProperty]
-        private Account selectedAccount;
+        private Account? selectedAccount = new();
         [ObservableProperty]
         private ObservableCollection<string> filterOptions = new()
         {
@@ -46,9 +46,9 @@ namespace Core.ViewModels
 
         public ObservableCollection<int> Years { get; } = new(
             Enumerable.Range(DateTime.Now.Year - 5, 11).ToList()); // 5 years back & forward
-        [ObservableProperty] private string selectedWeek;
-        [ObservableProperty] private string selectedMonth;
-        [ObservableProperty] private int selectedYear;
+        [ObservableProperty] private string selectedWeek = string.Empty;
+        [ObservableProperty] private string selectedMonth = string.Empty;
+        [ObservableProperty] private int selectedYear = 0;
 
         [ObservableProperty]
         private DateTime fromDate = DateTime.Today;
@@ -91,18 +91,30 @@ namespace Core.ViewModels
             IsFilterExpanded = !IsFilterExpanded;
         }
 
+        public SharedHeaderViewModel(string dbPath, IAccountService accountService)
+        {
+            this._accountService = accountService;
+            _database = new SQLiteAsyncConnection(dbPath);
+        }
+        public async Task LoadAccountsAsync(int accountId)
+        {
+            if (_accountService != null)
+            {
+                var accounts = await _accountService.GetAccountsAsync();
+                this.ListOfAccounts = new ObservableCollection<Account>(accounts);
+                this.ListOfAccounts.Add(new Account { Id = -1, Name = "All" });
+                this.ListOfAccounts.Add(new Account { Id = -2, Name = "Add New Account" });
+                OnPropertyChanged(nameof(ListOfAccounts));
+                var selectedAccount = accounts.FirstOrDefault(r => r.Id == accountId);
+                if (selectedAccount != null)
+                {
+                    SelectedAccount = ListOfAccounts.FirstOrDefault(a => a.Id == selectedAccount.Id);
+                }
 
-        //#region Collection
-        //[ObservableProperty]
-        //private ObservableCollection<Transaction> transactions;
-        //private ObservableCollection<Transaction> allTransactions;
-
-        //// Mark the property as observable
-        //[ObservableProperty]
-        //private ObservableCollection<Account> listOfAccounts;
-        //// Mark the property as observable
-        //[ObservableProperty]
-        //private Account selectedAccount;
-        //#endregion Collection
+                else
+                    SelectedAccount = this.ListOfAccounts.FirstOrDefault(a => a.Id == -1);
+                OnPropertyChanged(nameof(SelectedAccount));
+            }
+        }
     }
 }
