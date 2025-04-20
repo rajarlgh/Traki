@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SQLite;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Transactions;
 using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
@@ -18,6 +20,44 @@ namespace Core.ViewModels
         [ObservableProperty] private bool isWeekFilterSelected;
         [ObservableProperty] private bool isYearFilterSelected;
         [ObservableProperty] private string? selectedFilterOption;
+        [ObservableProperty]
+        private bool isFilterExpanded = false;
+        [ObservableProperty]
+        private ObservableCollection<Account> listOfAccounts;
+        [ObservableProperty]
+        private Account selectedAccount;
+        [ObservableProperty]
+        private ObservableCollection<string> filterOptions = new()
+        {
+            "Day",
+            "Week",
+            "Month",
+            "Year",
+            "Interval",
+            "Choose Date"
+        };
+        public ObservableCollection<string> Months { get; } = new(
+       CultureInfo.CurrentCulture.DateTimeFormat.MonthNames
+.Where(m => !string.IsNullOrEmpty(m))
+.ToList());
+
+        public ObservableCollection<string> Weeks { get; } = new(
+            Enumerable.Range(1, 52).Select(w => $"Week {w}").ToList());
+
+        public ObservableCollection<int> Years { get; } = new(
+            Enumerable.Range(DateTime.Now.Year - 5, 11).ToList()); // 5 years back & forward
+        [ObservableProperty] private string selectedWeek;
+        [ObservableProperty] private string selectedMonth;
+        [ObservableProperty] private int selectedYear;
+
+        [ObservableProperty]
+        private DateTime fromDate = DateTime.Today;
+
+
+        [ObservableProperty]
+        private DateTime toDate = DateTime.Today;
+        [ObservableProperty]
+        private DateTime onDate;
 #pragma warning restore 
 
         public bool IsAnyFilterVisible =>
@@ -44,6 +84,13 @@ namespace Core.ViewModels
         private readonly SQLiteAsyncConnection? _database;
         private readonly IAccountService? _accountService;
         #endregion DB
+
+        [RelayCommand]
+        private void ToggleFilter()
+        {
+            IsFilterExpanded = !IsFilterExpanded;
+        }
+
 
         //#region Collection
         //[ObservableProperty]

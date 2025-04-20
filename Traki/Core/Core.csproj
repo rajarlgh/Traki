@@ -36,4 +36,10 @@
     <None Include="D:\Traki\V1\Traki\Traki\Core\.editorconfig" />
   </ItemGroup>
 
+  <ItemGroup>
+    <MauiXaml Update="Views\CardView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+  </ItemGroup>
+
 </Project>

@@ -2,11 +2,110 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:Core.Views"
-             x:Class="Core.Views.SharedHeaderView">
-    <StackLayout>
-        <Label 
-     Text="Welcome to .NET MAUI! Shared Header Page"
-     VerticalOptions="Center" 
-     HorizontalOptions="Center" />
-    </StackLayout>
+             xmlns:viewmodels="clr-namespace:Core.ViewModels"
+             x:Class="Core.Views.SharedHeaderView"
+             x:DataType="viewmodels:SharedHeaderViewModel"
+             xmlns:models="clr-namespace:TrakiLibrary.Models;assembly=TrakiLibrary"
+             >
+
+    <VerticalStackLayout>
+        <views:CardView Title="Filters" Grid.Row="1" Margin="10,5">
+            <StackLayout>
+                <Button Text="{Binding IsFilterExpanded, Converter={StaticResource BooleanToTextConverter}}"
+                        Command="{Binding ToggleFilterCommand}" />
+
+                <Grid RowDefinitions="Auto, Auto, *, Auto">
+                    <Grid IsVisible="{Binding IsFilterExpanded}"  RowDefinitions="Auto, Auto, Auto, Auto" ColumnDefinitions="*, Auto, Auto" Padding="0" Margin="0,10,0,0">
+                        <Picker Title="Account" Grid.Row="0"
+                            ItemsSource="{Binding ListOfAccounts}"
+                            SelectedItem="{Binding SelectedAccount}">
+                            <Picker.ItemDisplayBinding>
+                                <Binding Path="Name" x:DataType="models:Account" />
+                            </Picker.ItemDisplayBinding>
+                        </Picker>
+
+
+                        <Picker Title="Select Filter" Grid.Row="1"
+                                ItemsSource="{Binding FilterOptions}"
+                                SelectedItem="{Binding SelectedFilterOption}" />
+
+
+                        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto" Grid.Row="2" ColumnDefinitions="Auto,Auto, Auto, Auto" IsVisible="{Binding IsAnyFilterVisible}">
+
+                            <!-- Week Filter -->
+                            <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,Auto" IsVisible="{Binding IsWeekFilterSelected}">
+                                <Label Text="Select Week" Grid.Column="0" VerticalTextAlignment="Center"/>
+                                <Picker ItemsSource="{Binding Weeks}"
+                                SelectedItem="{Binding SelectedWeek}"
+                                Grid.Column="1"/>
+                                <Picker ItemsSource="{Binding Years}"
+                                SelectedItem="{Binding SelectedYear}"
+                                Grid.Column="2"/>
+                                <!--<Button Text="Go"
+                                Grid.Column="3"
+                                Command="{Binding FilterByWeekProvidedCommand}" />-->
+                            </Grid>
+
+                            <!-- Month Filter -->
+                            <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto, Auto" IsVisible="{Binding IsMonthFilterSelected}">
+                                <Label Text="Select Month" Grid.Column="0" VerticalTextAlignment="Center"/>
+                                <Picker ItemsSource="{Binding Months}"
+                                    SelectedItem="{Binding SelectedMonth}"
+                                    Grid.Column="1" />
+
+                                <Label Text="Year" Grid.Column="2" VerticalTextAlignment="Center"/>
+                                <Picker ItemsSource="{Binding Years}"
+                                    SelectedItem="{Binding SelectedYear}"
+                                    Grid.Column="3" />
+
+                                <!--<Button Text="Go"
+                                    Grid.Column="4"
+                                    Command="{Binding FilterByMonthProvidedCommand}" />-->
+                            </Grid>
+
+                            <!-- Year Filter -->
+                            <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto" IsVisible="{Binding IsYearFilterSelected}">
+                                <Label Text="Select Year" Grid.Column="0" VerticalTextAlignment="Center"/>
+                                <Picker ItemsSource="{Binding Years}"
+                                    SelectedItem="{Binding SelectedYear}"
+                                    Grid.Column="1"/>
+                                <!--<Button Text="Go"
+                                    Grid.Column="2"
+                                    Command="{Binding FilterByYearProvidedCommand}" />-->
+                            </Grid>
+
+                            <!-- Grouped controls for Interval Filter -->
+                            <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto, Auto, Auto" RowDefinitions="Auto, Auto" IsVisible="{Binding IsIntervalFilterSelected}">
+                                <Label Text="From Date" Grid.Row="0" Grid.Column="0" VerticalTextAlignment="Center"/>
+                                <DatePicker x:Name="fromDate" Grid.Row="0" 
+                                        Grid.Column="1"
+                                        Date="{Binding FromDate, Mode=TwoWay}" />
+
+                                <Label Text="To Date" Grid.Row="0" Grid.Column="2" VerticalTextAlignment="Center"/>
+                                <DatePicker x:Name="toDate" Grid.Row="0" Grid.Column="3"
+                                                                     
+                                        Date="{Binding ToDate, Mode=TwoWay}" />
+
+
+                                <!--<Button Text="Go" Grid.Row="1" Grid.Column="3" Command="{Binding FilterByIntervalProvidedCommand}"/>-->
+                            </Grid>
+
+                            <!-- Grouped controls for Date Filter -->
+                            <Grid Grid.Row="4" ColumnDefinitions="Auto, Auto, *, Auto" IsVisible="{Binding IsDateFilterSelected}">
+                                <Label Text="Select Date" Grid.Column="0" VerticalTextAlignment="Center"/>
+                                <DatePicker x:Name="DateInput"
+                                        Grid.Column="1"
+                                        Date="{Binding OnDate, Mode=TwoWay}" />
+
+                                <!--<Button Text="Go" Grid.Column="3" Command="{Binding FilterByDateProvidedCommand}"/>-->
+                            </Grid>
+
+
+                        </Grid>
+
+                    </Grid>
+                </Grid>
+            </StackLayout>
+        </views:CardView>
+    </VerticalStackLayout>
 </ContentView>
