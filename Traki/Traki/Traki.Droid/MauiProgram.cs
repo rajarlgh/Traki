@@ -1,5 +1,6 @@
 ﻿using Core.ViewModels;
 using Core.Views;
+using Traki.Pages;
 using Traki.Service;
 using TrakiLibrary.Interfaces;
 
@@ -23,6 +24,10 @@ namespace Traki.Droid
             // Register the page and ViewModel with the dbPath
             RegisterPageWithViewModel<SharedHeaderViewModel, SharedHeaderView>(builder, dbPath);
 
+            // Register the page and ViewModel with the dbPath
+            RegisterPageWithViewModel<Traki.ViewModels.DashboardViewModel, DashboardPage>(builder, dbPath);
+            
+            
             return builder.Build();
         }
 

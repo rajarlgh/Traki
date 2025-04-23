@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:Core.Views"
              xmlns:converters="clr-namespace:Core.Converters"
+             
              x:Class="Core.Views.IncomeView">
     <ContentView.Resources>
         <ResourceDictionary>
@@ -12,9 +13,115 @@
     </ContentView.Resources>
 
     <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+        <!-- Main Content -->
+        <ScrollView Grid.Row="2" Padding="0,0,0,10">
+            <views:CardView Title="Transactions" Margin="10,0">
+                <StackLayout Spacing="10">
+
+                    <!-- Income Section -->
+                    <views:CardView Title="Income" >
+                        <StackLayout>
+                            <Button Text="{Binding IsIncomeExpanded, Converter={StaticResource BooleanToTextConverter}}"
+                                    Command="{Binding ToggleIncomeCommand}" />
+
+
+                            <Grid RowDefinitions="Auto, Auto" Padding="10" IsVisible="{Binding IsIncomeExpanded}" >
+                                <CollectionView x:Name="collectionViewIncome"
+                                            ItemsSource="{Binding IncomeChartEntryWrappers}"
+                                            IsVisible="{Binding DoVisibleChart, Converter={StaticResource InverseBooleanConverter}}"
+                                            SelectionMode="Single"
+                                            SelectionChanged="OnIncomeItemSelected">
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Vertical" Span="1" />
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="10" Margin="5" BackgroundColor="Transparent">
+                                                <Grid ColumnDefinitions="Auto,Auto">
+                                                    <Label Text="{Binding Entry.Label}" FontAttributes="Bold" Grid.Column="0" />
+                                                    <Label Text="{Binding Entry.ValueLabel}" FontSize="Small" Grid.Column="1"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+
+                                <Grid IsVisible="{Binding DoVisibleChart}" Grid.Row="1" Padding="10">
+                                    <Label Text="Income Chart" FontSize="24" HorizontalOptions="Center" />
+                                    <!--<views:BindableChartView Entries="{Binding IncomeChartEntryWrappers}"
+                                                                HeightRequest="200"
+                                                                WidthRequest="300" />-->
+                                </Grid>
+                            </Grid>
+                        </StackLayout>
+                    </views:CardView>
+
+                    <!-- Expenses Section -->
+                    <views:CardView Title="Expenses">
+                        <StackLayout>
+                            <Button Text="{Binding IsExpensesExpanded, Converter={StaticResource BooleanToTextConverter}}"
+                                    Command="{Binding ToggleExpensesCommand}" />
+                            <Grid RowDefinitions="Auto, Auto" Padding="10" IsVisible="{Binding IsExpensesExpanded}">
+                                <CollectionView x:Name="collectionViewExpense"
+                                            ItemsSource="{Binding ExpenseChartEntryWrappers}"
+                                            IsVisible="{Binding DoVisibleChart, Converter={StaticResource InverseBooleanConverter}}"
+                                            SelectionMode="Single"
+                                            SelectionChanged="OnExpenseItemSelected">
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Vertical" Span="1" />
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="10" Margin="5" BackgroundColor="Transparent">
+                                                <Grid ColumnDefinitions="Auto,Auto">
+                                                    <Label Text="{Binding Entry.Label}" FontAttributes="Bold" Grid.Column="0" />
+                                                    <Label Text="{Binding Entry.ValueLabel}" FontSize="Small" Grid.Column="1"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+
+                                <Grid IsVisible="{Binding DoVisibleChart}" Grid.Row="1" Padding="10">
+                                    <Label Text="Expense Chart" FontSize="24" HorizontalOptions="Center" />
+                                    <!--<views:BindableChartView Entries="{Binding ExpenseChartEntryWrappers}"
+                                                                HeightRequest="200"
+                                                                WidthRequest="300" />-->
+                                </Grid>
+                            </Grid>
+                        </StackLayout>
+                    </views:CardView>
+
+                    <!-- Selected Transaction Breakdown -->
+                    <views:CardView Title="Selected Transaction">
+                        <CollectionView ItemsSource="{Binding SelectedCategoryBreakdown}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="10" Margin="5" BackgroundColor="Transparent">
+                                        <ScrollView Orientation="Horizontal">
+                                            <Grid RowDefinitions="Auto, Auto"
+                                                  ColumnDefinitions="Auto, Auto, Auto, Auto">
+                                                <Label Text="Date" FontAttributes="Bold" Grid.Row="0" Grid.Column="0" />
+                                                <Label Text="Amount" FontAttributes="Bold" Grid.Row="0" Grid.Column="1" />
+                                                <Label Text="Action" FontAttributes="Bold" Grid.Row="0" Grid.Column="2" />
+                                                <Label Text="Reason" FontAttributes="Bold" Grid.Row="0" Grid.Column="3" />
+
+                                                <Label Text="{Binding Date}" Grid.Row="1" Grid.Column="0" />
+                                                <Label Text="{Binding Amount}" Grid.Row="1" Grid.Column="1" />
+                                                <Button Text="Edit"
+                                                        Grid.Row="1" Grid.Column="2"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditTransactionDetailsCommand}"
+                                                        CommandParameter="{Binding}" />
+                                                <Label Text="{Binding Reason}" Grid.Row="1" Grid.Column="3" />
+                                            </Grid>
+                                        </ScrollView>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </views:CardView>
+                </StackLayout>
+            </views:CardView>
+        </ScrollView>
     </VerticalStackLayout>
 </ContentView>

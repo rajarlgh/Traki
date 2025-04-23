@@ -20,6 +20,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Entity\ChartEntryWrapper.cs" />
+    <Compile Remove="Views\BindableChartView.xaml.cs" />
+    <Compile Remove="Views\IncomeView.xaml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
@@ -34,11 +40,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Remove="Views\BindableChartView.xaml" />
+    <MauiXaml Remove="Views\IncomeView.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="D:\Traki\V1\Traki\Traki\Core\.editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Entity\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <MauiXaml Update="Views\CardView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\SharedHeaderView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>
