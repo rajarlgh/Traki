@@ -1,11 +1,14 @@
-﻿using Microcharts;
+﻿using SkiaSharp;
 
 namespace Core.Entity
 {
     public class ChartEntryWrapper
     {
-        public ChartEntry? Entry { get; set; }
+        public float Value { get; set; }
+        public string? Label { get; set; }
+        public string? ValueLabel { get; set; }
+        public SKColor Color { get; set; }
         public int CategoryId { get; set; }
-        public string? CategoryName => Entry?.Label;
+        public string? CategoryName => Label;
     }
 }

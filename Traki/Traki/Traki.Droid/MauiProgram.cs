@@ -1,4 +1,5 @@
-﻿using Core.ViewModels;
+﻿using AndroidX.ViewPager.Widget;
+using Core.ViewModels;
 using Core.Views;
 using Traki.Pages;
 using Traki.Service;
@@ -26,8 +27,9 @@ namespace Traki.Droid
 
             // Register the page and ViewModel with the dbPath
             RegisterPageWithViewModel<Traki.ViewModels.DashboardViewModel, DashboardPage>(builder, dbPath);
-            
-            
+            //RegisterPageWithViewModel<Traki.ViewModels.IncomeViewModel, ViewPager>(builder, dbPath);
+
+
             return builder.Build();
         }
 

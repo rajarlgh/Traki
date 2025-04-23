@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Core.Views;
 using TrakiLibrary.Interfaces;
 
 namespace Traki.ViewModels
@@ -22,7 +23,7 @@ namespace Traki.ViewModels
         [RelayCommand]
         private void ShowIncome()
         {
-           // SelectedTabView = new IncomeView();
+           SelectedTabView = new IncomeView();
         }
     }
 }

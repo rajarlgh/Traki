@@ -1,13 +1,19 @@
-
 using Core.Entity;
-//using Microcharts;
+using SkiaSharp;
+using SkiaSharp.Views.Maui;
+using SkiaSharp.Views.Maui.Controls;
+using System.Collections.ObjectModel;
 
 namespace Core.Views;
 
 public partial class BindableChartView : ContentView
 {
     public static readonly BindableProperty EntriesProperty =
-       BindableProperty.Create(nameof(Entries), typeof(IEnumerable<ChartEntryWrapper>), typeof(BindableChartView), propertyChanged: OnEntriesChanged);
+        BindableProperty.Create(
+            nameof(Entries),
+            typeof(IEnumerable<ChartEntryWrapper>),
+            typeof(BindableChartView),
+            propertyChanged: OnEntriesChanged);
 
     public IEnumerable<ChartEntryWrapper> Entries
     {
@@ -17,26 +23,48 @@ public partial class BindableChartView : ContentView
 
     public BindableChartView()
     {
-        InitializeComponent(); // Load the XAML layout
+        InitializeComponent();
     }
 
     private static void OnEntriesChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        if (bindable is BindableChartView chartView && newValue is IEnumerable<ChartEntryWrapper> entries)
+        if (bindable is BindableChartView view)
         {
-            chartView.UpdateChart(entries);
+            view.ChartCanvas.InvalidateSurface(); // Redraw
         }
     }
 
-    private void UpdateChart(IEnumerable<ChartEntryWrapper> entries)
+    private void OnPaintSurface(object sender, SKPaintSurfaceEventArgs e)
     {
-        // Convert ChartEntryWrapper to ChartEntry
-        var chartEntries = entries.Select(e => e.Entry);
+        var canvas = e.Surface.Canvas;
+        canvas.Clear(SKColors.White);
 
-        // Update the chart
-        //controlChartView.Chart = new DonutChart
-        //{
-        //    Entries = chartEntries
-        //};
+        if (Entries == null || !Entries.Any()) return;
+
+        float centerX = e.Info.Width / 2f;
+        float centerY = e.Info.Height / 2f;
+        float radius = Math.Min(centerX, centerY) - 10;
+        float startAngle = -90f;
+
+        float total = Entries.Sum(entry => entry.Value);
+
+        foreach (var entry in Entries)
+        {
+            float sweepAngle = (entry.Value / total) * 360f;
+
+            using var paint = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                StrokeWidth = 40,
+                Color = entry.Color,
+                IsAntialias = true
+            };
+
+            var rect = new SKRect(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+            canvas.DrawArc(rect, startAngle, sweepAngle, false, paint);
+
+            startAngle += sweepAngle;
+        }
     }
+
 }
