@@ -5,11 +5,11 @@ namespace Core.Views;
 public partial class IncomeView : ContentView
 {
     private IncomeViewModel? _viewModel;
-    public IncomeView(/*IncomeViewModel viewModel*/)
+    public IncomeView(IncomeViewModel viewModel)
 	{
         InitializeComponent();
-        //_viewModel = viewModel;
-        //BindingContext = _viewModel;
+        _viewModel = viewModel;
+        BindingContext = _viewModel;
     }
     private void OnIncomeItemSelected(object sender, SelectionChangedEventArgs e)
     {

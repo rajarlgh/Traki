@@ -1,16 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Core.ViewModels;
 using Core.Views;
+using Microsoft.Extensions.DependencyInjection;
 using TrakiLibrary.Interfaces;
 
 namespace Traki.ViewModels
 {
     public partial class DashboardViewModel : ObservableObject
     {
+        private readonly IServiceProvider _serviceProvider;
 
-        public DashboardViewModel(string dbPath, IAccountService accountService)
+        public DashboardViewModel(string dbPath, IAccountService accountService, IServiceProvider serviceProvider   )
         {
-
+            _serviceProvider = serviceProvider;
         }
 #pragma warning disable
 
@@ -23,7 +26,8 @@ namespace Traki.ViewModels
         [RelayCommand]
         private void ShowIncome()
         {
-           SelectedTabView = new IncomeView();
+            var viewModel = _serviceProvider.GetRequiredService<IncomeViewModel>();
+            SelectedTabView = new IncomeView(viewModel);
         }
 
         [RelayCommand]

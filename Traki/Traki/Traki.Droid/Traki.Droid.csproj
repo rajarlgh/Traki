@@ -16,6 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\Core\Core.csproj" />
 		<ProjectReference Include="..\..\Traki.Service\Traki.Service.csproj" />
 		<ProjectReference Include="..\Traki\Traki.csproj" />
 	</ItemGroup>

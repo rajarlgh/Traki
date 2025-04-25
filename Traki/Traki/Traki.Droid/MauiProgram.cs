@@ -3,6 +3,7 @@ using Core.ViewModels;
 using Core.Views;
 using Traki.Pages;
 using Traki.Service;
+using Traki.ViewModels;
 using TrakiLibrary.Interfaces;
 
 namespace Traki.Droid
@@ -24,11 +25,15 @@ namespace Traki.Droid
 
             // Register the page and ViewModel with the dbPath
             RegisterPageWithViewModel<SharedHeaderViewModel, SharedHeaderView>(builder, dbPath);
+            RegisterPageWithViewModel<IncomeViewModel, IncomeView>(builder, dbPath);
 
-            // Register the page and ViewModel with the dbPath
-            RegisterPageWithViewModel<Traki.ViewModels.DashboardViewModel, DashboardPage>(builder, dbPath);
-            //RegisterPageWithViewModel<Traki.ViewModels.IncomeViewModel, ViewPager>(builder, dbPath);
-
+            //RegisterPageWithViewModel<Traki.ViewModels.DashboardViewModel, DashboardPage>(builder, dbPath);
+            builder.Services.AddSingleton<DashboardViewModel>(provider =>
+            {
+                var accountService = provider.GetRequiredService<IAccountService>();
+                return new DashboardViewModel(dbPath, accountService, provider);
+            });
+            builder.Services.AddSingleton<DashboardPage>();
 
             return builder.Build();
         }

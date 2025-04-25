@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Core.Shared;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -65,19 +67,10 @@ namespace Core.ViewModels
 
         partial void OnSelectedFilterOptionChanged(string? value)
         {
-            IsDateFilterSelected = value == "Choose Date";
-            IsIntervalFilterSelected = value == "Interval";
-            IsMonthFilterSelected = value == "Month";
-            IsWeekFilterSelected = value == "Week";
-            IsYearFilterSelected = value == "Year";
-
-            if (value == "Day")
-            {
-                var today = DateTime.Today;
-                var endOfDay = today.AddDays(1).AddTicks(-1);
-                // FilterTransactionsByRange(today, endOfDay);
-            }
+            // your logic...
+            PublishFilterChanged();
         }
+
         #endregion Filter
 
         #region DB
@@ -120,5 +113,23 @@ namespace Core.ViewModels
                 OnPropertyChanged(nameof(SelectedAccount));
             }
         }
+
+        private void PublishFilterChanged()
+        {
+            var filterState = new FilterState
+            {
+                SelectedFilterOption = SelectedFilterOption,
+                SelectedMonth = SelectedMonth,
+                SelectedWeek = SelectedWeek,
+                SelectedYear = SelectedYear,
+                FromDate = FromDate,
+                ToDate = ToDate,
+                OnDate = OnDate,
+                SelectedAccount = SelectedAccount
+            };
+
+            WeakReferenceMessenger.Default.Send(new FilterChangedMessage(filterState));
+        }
+
     }
 }
