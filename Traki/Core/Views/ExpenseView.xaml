@@ -4,33 +4,30 @@
              xmlns:views="clr-namespace:Core.Views"
              xmlns:converters="clr-namespace:Core.Converters"
              
-             x:Class="Core.Views.IncomeView">
+             x:Class="Core.Views.ExpenseView">
     <ContentView.Resources>
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:BooleanToTextConverter x:Key="BooleanToTextConverter" />
         </ResourceDictionary>
     </ContentView.Resources>
-
     <VerticalStackLayout>
         <!-- Main Content -->
         <ScrollView Grid.Row="2" Padding="0,0,0,10">
             <views:CardView Title="Transactions" Margin="10,0">
                 <StackLayout Spacing="10">
 
-                    <!-- Income Section -->
-                    <views:CardView Title="Income" >
+                    <!-- Expenses Section -->
+                    <views:CardView Title="Expenses">
                         <StackLayout>
-                            <Button Text="{Binding IsIncomeExpanded, Converter={StaticResource BooleanToTextConverter}}"
-                                    Command="{Binding ToggleIncomeCommand}" />
-
-
-                            <Grid RowDefinitions="Auto, Auto" Padding="10" IsVisible="{Binding IsIncomeExpanded}" >
-                                <CollectionView x:Name="collectionViewIncome"
-                                            ItemsSource="{Binding IncomeChartEntryWrappers}"
+                            <Button Text="{Binding IsExpensesExpanded, Converter={StaticResource BooleanToTextConverter}}"
+                                    Command="{Binding ToggleExpensesCommand}" />
+                            <Grid RowDefinitions="Auto, Auto" Padding="10" IsVisible="{Binding IsExpensesExpanded}">
+                                <CollectionView x:Name="collectionViewExpense"
+                                            ItemsSource="{Binding ExpenseChartEntryWrappers}"
                                             IsVisible="{Binding DoVisibleChart, Converter={StaticResource InverseBooleanConverter}}"
                                             SelectionMode="Single"
-                                            SelectionChanged="OnIncomeItemSelected">
+                                            SelectionChanged="OnExpenseItemSelected">
                                     <CollectionView.ItemsLayout>
                                         <GridItemsLayout Orientation="Vertical" Span="1" />
                                     </CollectionView.ItemsLayout>
@@ -47,8 +44,8 @@
                                 </CollectionView>
 
                                 <Grid IsVisible="{Binding DoVisibleChart}" Grid.Row="1" Padding="10">
-                                    <Label Text="Income Chart" FontSize="24" HorizontalOptions="Center" />
-                                    <!--<views:BindableChartView Entries="{Binding IncomeChartEntryWrappers}"
+                                    <Label Text="Expense Chart" FontSize="24" HorizontalOptions="Center" />
+                                    <!--<views:BindableChartView Entries="{Binding ExpenseChartEntryWrappers}"
                                                                 HeightRequest="200"
                                                                 WidthRequest="300" />-->
                                 </Grid>

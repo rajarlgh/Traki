@@ -45,6 +45,9 @@
     <MauiXaml Update="Views\CardView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Views\ExpenseView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\IncomeView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

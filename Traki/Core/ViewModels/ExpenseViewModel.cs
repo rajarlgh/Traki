@@ -2,9 +2,8 @@
 
 namespace Core.ViewModels
 {
-    public class IncomeViewModel : ObservableObject
+    internal class ExpenseViewModel : ObservableObject
     {
 
     }
-
 }
