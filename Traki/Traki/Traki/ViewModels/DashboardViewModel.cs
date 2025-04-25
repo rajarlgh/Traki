@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using Core.ViewModels;
 using Core.Views;
-using Microsoft.Extensions.DependencyInjection;
 using TrakiLibrary.Interfaces;
 
 namespace Traki.ViewModels

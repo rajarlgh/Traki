@@ -1,3 +1,4 @@
+using Core.Views;
 using Traki.ViewModels;
 
 namespace Traki.Pages;
@@ -16,5 +17,13 @@ public partial class DashboardPage : ContentPage
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = _viewModel;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (SharedHeaderControl != null)
+            await SharedHeaderControl.ReloadAccountsAsync();
     }
 }

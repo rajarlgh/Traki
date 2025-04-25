@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Core.Pages;
 using Core.Shared;
+using Core.Views;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -74,7 +76,6 @@ namespace Core.ViewModels
         #endregion Filter
 
         #region DB
-        private readonly SQLiteAsyncConnection? _database;
         private readonly IAccountService? _accountService;
         #endregion DB
 
@@ -82,7 +83,6 @@ namespace Core.ViewModels
         public SharedHeaderViewModel(string dbPath, IAccountService accountService)
         {
             this._accountService = accountService;
-            _database = new SQLiteAsyncConnection(dbPath);
         }
         #endregion Constructor
 
@@ -129,6 +129,30 @@ namespace Core.ViewModels
             };
 
             WeakReferenceMessenger.Default.Send(new FilterChangedMessage(filterState));
+        }
+
+        partial void OnSelectedAccountChanged(Account? value)
+        {
+            if (value != null && value.Id != -1) /*All - Selected in Account dropdown.*/
+            {
+                //    var account = this._accountService??.GetAccountsAsync();
+
+                //    var trans = allTransactions.Where(r => r.AccountId == value.Id).ToList();
+                //    Transactions = new ObservableCollection<Transaction>(trans);
+                //}
+                //else
+                //{
+                //    Transactions = new ObservableCollection<Transaction>(allTransactions);
+                //}
+                //LoadTransactionsAndSetGrid(Transactions);
+                //CalculateBalances();
+                if (value != null && value.Name == "Add New Account")
+                {
+                    Shell.Current.GoToAsync(nameof(ManageAccountsPage));
+                }
+            }
+            //SelectedCategoryBreakdown = null;
+            //this.RefreshDataAsync();
         }
 
     }

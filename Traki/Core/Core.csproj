@@ -39,6 +39,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Pages\ManageAccountsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\BindableChartView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

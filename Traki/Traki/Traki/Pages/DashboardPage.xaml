@@ -8,7 +8,7 @@
     <VerticalStackLayout>
 
         <!-- Shared Header -->
-        <coreControls:SharedHeaderView> </coreControls:SharedHeaderView >
+        <coreControls:SharedHeaderView x:Name="SharedHeaderControl"> </coreControls:SharedHeaderView >
 
          <!--Tab Buttons--> 
         <HorizontalStackLayout Padding="10" Spacing="10" HorizontalOptions="Center">

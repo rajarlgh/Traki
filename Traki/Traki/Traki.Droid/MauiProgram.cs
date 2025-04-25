@@ -1,6 +1,8 @@
 ﻿using AndroidX.ViewPager.Widget;
+using Core.Pages;
 using Core.ViewModels;
 using Core.Views;
+using Microsoft.Extensions.DependencyInjection;
 using Traki.Pages;
 using Traki.Service;
 using Traki.ViewModels;
@@ -17,26 +19,43 @@ namespace Traki.Droid
             // Determine the database path based on the platform
             string? dbPath = GetDatabasePath();
 
-            builder.Services.AddSingleton<IAccountService>(provider =>
-            {
-                return new AccountService(dbPath!);
-            });
+            RegisterService<IAccountService, AccountService>(builder, dbPath);
+            RegisterService<ITransactionService, TransactionService>(builder, dbPath);
+
             builder.UseSharedMauiApp();
 
             // Register the page and ViewModel with the dbPath
             RegisterPageWithViewModel<SharedHeaderViewModel, SharedHeaderView>(builder, dbPath);
-            RegisterPageWithViewModel<IncomeViewModel, IncomeView>(builder, dbPath);
+            RegisterPageWithViewModel<ManageAccountsViewModel, ManageAccountsPage>(builder);
 
             //RegisterPageWithViewModel<Traki.ViewModels.DashboardViewModel, DashboardPage>(builder, dbPath);
             builder.Services.AddSingleton<DashboardViewModel>(provider =>
             {
-                var accountService = provider.GetRequiredService<IAccountService>();
-                return new DashboardViewModel(dbPath, accountService, provider);
+                var service = provider.GetRequiredService<IAccountService>();
+                return new DashboardViewModel(dbPath, service, provider);
             });
+            builder.Services.AddSingleton<IncomeViewModel>(provider =>
+            {
+                var service = provider.GetRequiredService<ITransactionService>();
+                return new IncomeViewModel(dbPath, service);
+            });
+
             builder.Services.AddSingleton<DashboardPage>();
 
             return builder.Build();
         }
+
+        private static void RegisterService<TInterface, TImplementation>(MauiAppBuilder builder, string? dbPath = null)
+    where TInterface : class
+    where TImplementation : class, TInterface
+        {
+            builder.Services.AddSingleton<TInterface>(provider =>
+            {
+                return (TInterface)(Activator.CreateInstance(typeof(TImplementation), dbPath!)
+                    ?? throw new InvalidOperationException($"Could not create instance of {typeof(TImplementation)}"));
+            });
+        }
+
 
         // Common function to register pages and ViewModels with a factory for ViewModel creation
         private static void RegisterPageWithViewModel<TViewModel, TPage>(MauiAppBuilder builder, string? dbPath = null)
@@ -50,8 +69,13 @@ namespace Traki.Droid
                 {
                     // Get required services
                     var accountService = provider.GetRequiredService<IAccountService>();
+                    var transactionService = provider.GetRequiredService<ITransactionService>();
                     // Create the ViewModel instance with dbPath and accountService
-                    return (TViewModel)Activator.CreateInstance(typeof(TViewModel), dbPath, accountService);
+                    //return (TViewModel)Activator.CreateInstance(typeof(TViewModel), dbPath, accountService);
+                    var instance = Activator.CreateInstance(typeof(TViewModel), dbPath, accountService, transactionService)
+    ?? throw new InvalidOperationException($"Could not create an instance of {typeof(TViewModel)}.");
+                    return (TViewModel)instance;
+
                 });
             }
             else

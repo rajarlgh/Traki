@@ -35,5 +35,12 @@ public partial class SharedHeaderView : ContentView
         _viewModel = viewModel;
         BindingContext = _viewModel;
     }
+
+    public async Task ReloadAccountsAsync()
+    {
+        if (_viewModel != null)
+            await _viewModel.LoadAccountsAsync(0);
+    }
+
 }
 
