@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+              xmlns:views="clr-namespace:Core.Views"
+             x:Class="Core.Views.TransactionView">
+    <VerticalStackLayout>
+        <StackLayout>
+            <!-- Selected Transaction Breakdown -->
+            <views:CardView Title="Selected Transaction">
+                <CollectionView ItemsSource="{Binding SelectedCategoryBreakdown}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="10" Margin="5" BackgroundColor="Transparent">
+                                <ScrollView Orientation="Horizontal">
+                                    <Grid RowDefinitions="Auto, Auto"
+                                ColumnDefinitions="Auto, Auto, Auto, Auto">
+                                        <Label Text="Date" FontAttributes="Bold" Grid.Row="0" Grid.Column="0" />
+                                        <Label Text="Amount" FontAttributes="Bold" Grid.Row="0" Grid.Column="1" />
+                                        <Label Text="Action" FontAttributes="Bold" Grid.Row="0" Grid.Column="2" />
+                                        <Label Text="Reason" FontAttributes="Bold" Grid.Row="0" Grid.Column="3" />
+
+                                        <Label Text="{Binding Date}" Grid.Row="1" Grid.Column="0" />
+                                        <Label Text="{Binding Amount}" Grid.Row="1" Grid.Column="1" />
+                                        <Button Text="Edit"
+                                      Grid.Row="1" Grid.Column="2"
+                                      Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditTransactionDetailsCommand}"
+                                      CommandParameter="{Binding}" />
+                                        <Label Text="{Binding Reason}" Grid.Row="1" Grid.Column="3" />
+                                    </Grid>
+                                </ScrollView>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </views:CardView>
+        </StackLayout>
+    </VerticalStackLayout>
+</ContentView>

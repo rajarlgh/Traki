@@ -26,11 +26,16 @@ namespace Traki.ViewModels
            SelectedTabView = new IncomeView();
         }
 
-
         [RelayCommand]
         private void ShowExpense()
         {
             SelectedTabView = new ExpenseView();
+        }
+
+        [RelayCommand]
+        private void ShowTransactions()
+        {
+            SelectedTabView = new TransactionView();
         }
     }
 }
