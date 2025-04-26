@@ -31,7 +31,7 @@
 
 
 
-                        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto" Grid.Row="2" ColumnDefinitions="Auto,Auto, Auto, Auto" IsVisible="{Binding IsAnyFilterVisible}"  RowSpacing="10" ColumnSpacing="10" 
+                        <Grid RowDefinitions="Auto, Auto, Auto" Grid.Row="2" ColumnDefinitions="Auto,Auto, Auto, Auto" IsVisible="{Binding IsAnyFilterVisible}"  RowSpacing="10" ColumnSpacing="10" >
                             <!-- Week Filter -->
                             <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,Auto" IsVisible="{Binding IsWeekFilterSelected}"  RowSpacing="10" ColumnSpacing="10" >
                                 <Label Text="Select Week" Grid.Column="0" VerticalTextAlignment="Center"/>
@@ -50,52 +50,52 @@
                             <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto, Auto" IsVisible="{Binding IsMonthFilterSelected}"  RowSpacing="10" ColumnSpacing="10" >
                                 <Label Text="Select Month" Grid.Column="0" VerticalTextAlignment="Center"/>
                                 <Picker ItemsSource="{Binding Months}"
-                                    SelectedItem="{Binding SelectedMonth}"
-                                    Grid.Column="1" />
+         SelectedItem="{Binding SelectedMonth}"
+         Grid.Column="1" />
 
                                 <Label Text="Year" Grid.Column="2" VerticalTextAlignment="Center"/>
                                 <Picker ItemsSource="{Binding Years}"
-                                    SelectedItem="{Binding SelectedYear}"
-                                    Grid.Column="3" />
+         SelectedItem="{Binding SelectedYear}"
+         Grid.Column="3" />
 
                                 <Button Text="Go"
-                                    Grid.Column="4"
-                                    Command="{Binding FilterTransactionsCommand}" />
+         Grid.Column="4"
+         Command="{Binding FilterTransactionsCommand}" />
                             </Grid>
 
                             <!-- Year Filter -->
                             <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto" IsVisible="{Binding IsYearFilterSelected}"  RowSpacing="10" ColumnSpacing="10" >
                                 <Label Text="Select Year" Grid.Column="0" VerticalTextAlignment="Center"/>
                                 <Picker ItemsSource="{Binding Years}"
-                                    SelectedItem="{Binding SelectedYear}"
-                                    Grid.Column="1"/>
+         SelectedItem="{Binding SelectedYear}"
+         Grid.Column="1"/>
                                 <Button Text="Go"
-                                    Grid.Column="2"
-                                    Command="{Binding FilterTransactionsCommand}" />
+         Grid.Column="2"
+         Command="{Binding FilterTransactionsCommand}" />
                             </Grid>
 
                             <!-- Grouped controls for Interval Filter -->
                             <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto, Auto, Auto" RowDefinitions="Auto, Auto" IsVisible="{Binding IsIntervalFilterSelected}" RowSpacing="10" ColumnSpacing="10" >
                                 <Label Text="From Date" Grid.Row="0" Grid.Column="0" VerticalTextAlignment="Center"/>
                                 <DatePicker x:Name="fromDate" Grid.Row="0" 
-                                        Grid.Column="1"
-                                        Date="{Binding FromDate, Mode=TwoWay}" />
+             Grid.Column="1"
+             Date="{Binding FromDate, Mode=TwoWay}" />
 
                                 <Label Text="To Date" Grid.Row="0" Grid.Column="2" VerticalTextAlignment="Center"/>
                                 <DatePicker x:Name="toDate" Grid.Row="0" Grid.Column="3"
-                                                                     
-                                        Date="{Binding ToDate, Mode=TwoWay}" />
+                                          
+             Date="{Binding ToDate, Mode=TwoWay}" />
 
 
                                 <Button Text="Go" Grid.Row="0" Grid.Column="3" Command="{Binding FilterTransactionsCommand}"/>
                             </Grid>
 
                             <!-- Grouped controls for Date Filter -->
-                            <Grid Grid.Row="4" ColumnDefinitions="Auto, Auto, *, Auto" IsVisible="{Binding IsDateFilterSelected}"  RowSpacing="10" ColumnSpacing="10" >
+                            <Grid Grid.Row="4" ColumnDefinitions="Auto, Auto, *, Auto" IsVisible="{Binding IsDateFilterSelected}">
                                 <Label Text="Select Date" Grid.Column="0" VerticalTextAlignment="Center"/>
                                 <DatePicker x:Name="DateInput"
-                                        Grid.Column="1"
-                                        Date="{Binding OnDate, Mode=TwoWay}" />
+             Grid.Column="1"
+             Date="{Binding OnDate, Mode=TwoWay}" />
 
                                 <Button Text="Go" Grid.Column="3" Command="{Binding FilterTransactionsCommand}"/>
                             </Grid>

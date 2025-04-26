@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Core.Enum;
 using Core.Shared;
+using System.Globalization;
 using TrakiLibrary.Interfaces;
 
 namespace Core.ViewModels
@@ -51,45 +52,85 @@ namespace Core.ViewModels
             var transactions = _transactionService.GetTransactionsAsync().Result;
             var option = filter.SelectedFilterOption;
             var account = filter.SelectedAccount;
+            var year = filter.SelectedYear;
+            var month = filter.SelectedMonth;
+            var week = filter.SelectedWeek;
 
-           
+            var fromDate = filter.FromDate;
+            var toDate = filter.ToDate;
+
+            var filteredTransactions = transactions.Where(t => t.Date >= fromDate && t.Date <= toDate && t.AccountId == filter.SelectedAccount.Id);
+
+            
+
             if (option == FilterOption.All)
             {
-                var year = string.Empty;
-
+                year = 0;
             }
             else if (option == FilterOption.Day)
             {
                 var today = DateTime.Today; // midnight (00:00)
                 var endOfDay = today.AddDays(1).AddTicks(-1); // 23:59:59.9999999
-                FilterTransactionsByRange(today, endOfDay);
             }
             else if (option == FilterOption.Week)
             {
-                var week = filter.SelectedWeek;
-                var year = filter.SelectedYear;
+                var yr = filter.SelectedYear.Value;
+
+                var selectedWeek = filter.SelectedWeek;
+
+                if (string.IsNullOrWhiteSpace(selectedWeek) || yr == 0)
+                    return;
+
+                if (!int.TryParse(selectedWeek.Replace("Week ", ""), out int parsedWeek) || parsedWeek <= 0)
+                    return;
+
+                // Get the first Monday of the year
+                DateTime jan1 = new DateTime(yr, 1, 1);   
+                int daysOffset = DayOfWeek.Monday - jan1.DayOfWeek;
+                DateTime firstMonday = jan1.AddDays(daysOffset >= 0 ? daysOffset : daysOffset + 7);
+
+                DateTime startOfWeek = firstMonday.AddDays(((int.Parse(selectedWeek))- 1) * 7);
+                DateTime endOfWeek = startOfWeek.AddDays(6);
+
+                // Clamp to correct year boundaries
+                if (startOfWeek.Year < yr) startOfWeek = new DateTime(yr, 1, 1);
+                if (endOfWeek.Year > yr) endOfWeek = new DateTime(yr, 12, 31);
 
             }
             else if (option == FilterOption.Month)
             {
-                var month = filter.SelectedMonth;
-                var year = filter.SelectedYear;
+                var mon = filter.SelectedMonth;
+                var yr = filter.SelectedYear;
+
+                if (string.IsNullOrWhiteSpace(mon) || yr == 0)
+                    return;
+
+                int m = DateTime.ParseExact(mon, "MMMM", CultureInfo.CurrentCulture).Month;
+                int y = yr.Value;
+
+                fromDate = new DateTime(y, m, 1);
+                toDate = fromDate.AddMonths(1).AddDays(-1);
             }
             else if (option == FilterOption.Year)
             {
-                var year = filter.SelectedYear;
+                var yr = filter.SelectedYear.Value;
+                fromDate = new DateTime(yr, 1, 1);
+                toDate = new DateTime(yr, 12, 31);
             }
             else if (option == FilterOption.Interval)
             {
-                var fromDate = filter.FromDate;
-                var toDate = filter.ToDate;
+                fromDate = filter.FromDate;
+                toDate = filter.ToDate;
             }
             else if (option == FilterOption.ChooseDate)
             {
-                var fromDate = filter.FromDate;
-                var toDate = filter.ToDate;
+                fromDate = filter.FromDate;
+                toDate = filter.ToDate;
             }
-            //var   filteredTransactions = transactions.Where(t => t.Date >= filter.Selec && t.Date <= endDate && t.AccountId == selectedAccount.Id);
+
+            FilterTransactionsByRange(fromDate, toDate);
+
+
             //else
             //    filteredTransactions = filteredTransactions.Where(t => t.Date >= startDate && t.Date <= endDate);
             //var data = filteredTransactions.ToListAsync().Result;
