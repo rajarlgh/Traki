@@ -1,8 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Core.Entity;
 using Core.Enum;
 using Core.Shared;
+using SkiaSharp;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using TrakiLibrary.Interfaces;
 
@@ -18,6 +21,8 @@ namespace Core.ViewModels
 #pragma warning disable
         [ObservableProperty]
         private bool isIncomeExpanded = false;
+        [ObservableProperty]
+        private ObservableCollection<ChartEntryWrapper> incomeChartEntryWrappers;
 #pragma warning restore
 
         #region Public Constructor
@@ -49,7 +54,6 @@ namespace Core.ViewModels
         private void UpdateIncomeChart(FilterState filter)
         {
             // your logic to refresh IncomeChartEntryWrappers based on filter
-            var transactions = _transactionService.GetTransactionsAsync().Result;
             var option = filter.SelectedFilterOption;
             var account = filter.SelectedAccount;
             var year = filter.SelectedYear;
@@ -59,7 +63,7 @@ namespace Core.ViewModels
             var fromDate = filter.FromDate;
             var toDate = filter.ToDate;
 
-            var filteredTransactions = transactions.Where(t => t.Date >= fromDate && t.Date <= toDate && t.AccountId == filter.SelectedAccount.Id);
+
 
             
 
@@ -128,7 +132,7 @@ namespace Core.ViewModels
                 toDate = filter.ToDate;
             }
 
-            FilterTransactionsByRange(fromDate, toDate);
+            FilterTransactionsByRange(fromDate, toDate, filter.SelectedAccount.Id);
 
 
             //else
@@ -145,20 +149,48 @@ namespace Core.ViewModels
 
         }
 
-        private async void FilterTransactionsByRange(DateTime startDate, DateTime endDate)
+        private async void FilterTransactionsByRange(DateTime fromDate, DateTime toDate, int accountId)
         {
-            //var filteredTransactions = _database.Table<Transaction>();
-            //var t = filteredTransactions.ToListAsync().Result;
-            //// Get record counts grouped by month from the database
-            //// var dbMonthlyCounts = await GetRecordCountsByMonthFromDatabaseAsync();
 
-            //if (selectedAccount != null && selectedAccount.Id > 0)
-            //    filteredTransactions = filteredTransactions.Where(t => t.Date >= startDate && t.Date <= endDate && t.AccountId == selectedAccount.Id);
+            var transactions = await _transactionService.GetTransactionsAsync();
+            //if (accountId > 0)
+            //{
+            //    var filteredTransactions = transactions.Where(t => t.Date >= fromDate && t.Date <= toDate && t.AccountId == accountId);
+            //}
             //else
-            //    filteredTransactions = filteredTransactions.Where(t => t.Date >= startDate && t.Date <= endDate);
-            //var data = filteredTransactions.ToListAsync().Result;
+            //{
+            //    var filteredTransactions = transactions.Where(t => t.Date >= fromDate && t.Date <= toDate);
+            //}
             //allTransactions = new ObservableCollection<Transaction>(data);
 
+            var incomeGroupedData = transactions
+               .Where(t => t.Category != null && t.Type == "Income")
+               .GroupBy(t => t.Category.Id)
+               .Select(g =>
+               {
+                   var first = g.First();
+                   return new
+                   {
+                       CategoryId = g.Key,
+                       CategoryName = first.Category.Name,
+                       TotalAmount = g.Sum(t => t.Amount)
+                   };
+               });
+
+            var incomeData = incomeGroupedData.Select(data => new ChartEntryWrapper
+            {
+                
+                    Label = data.CategoryName,
+                    ValueLabel = data.TotalAmount.ToString("F0"),
+                    Color = GetCategoryColor(data.CategoryName?? string.Empty),
+                    CategoryId = data.CategoryId,
+            }).ToList();
+
+            // Set collection of ChartEntryWrapper for CollectionView
+            IncomeChartEntryWrappers = new ObservableCollection<ChartEntryWrapper>(incomeData);
+
+            // Recreate charts
+            //IncomeChart = CreateChart(IncomeChartEntryWrappers);
             //// Execute the query and update the Transactions list
             //Transactions = new ObservableCollection<Transaction>(data);
 
@@ -167,6 +199,39 @@ namespace Core.ViewModels
             //this.LoadTransactionsAndSetGrid(Transactions);
 
         }
+        private readonly Dictionary<string, SKColor> _categoryColors = new();
+        private readonly List<SKColor> _availableColors = new()
+        {
+            SKColor.Parse("#00FF00"), // Green
+            SKColor.Parse("#FF5733"), // Orange
+            SKColor.Parse("#3498DB"), // Blue
+            SKColor.Parse("#9B59B6"), // Purple
+            SKColor.Parse("#1ABC9C"), // Teal
+            SKColor.Parse("#F1C40F"), // Yellow
+            SKColor.Parse("#E74C3C"), // Red
+            SKColor.Parse("#34495E"), // Dark Gray
+            SKColor.Parse("#2ECC71"), // Light Green
+            SKColor.Parse("#E67E22"), // Light Orange
+            SKColor.Parse("#16A085"), // Dark Teal
+            SKColor.Parse("#8E44AD"), // Deep Purple
+            SKColor.Parse("#BDC3C7")  // Light Gray
+        };
+        private int _colorIndex = 0;
+        private SKColor GetCategoryColor(string category)
+        {
+            if (!_categoryColors.ContainsKey(category))
+            {
+                // Assign the next available color
+                var color = _availableColors[_colorIndex];
+                _categoryColors[category] = color;
+
+                // Update the color index, wrap around if necessary
+                _colorIndex = (_colorIndex + 1) % _availableColors.Count;
+            }
+
+            return _categoryColors[category];
+        }
+
         #endregion Private Methods
 
         #region Commands
@@ -177,5 +242,4 @@ namespace Core.ViewModels
         }
         #endregion 
     }
-
 }
