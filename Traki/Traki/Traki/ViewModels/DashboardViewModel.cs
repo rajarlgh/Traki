@@ -13,6 +13,8 @@ namespace Traki.ViewModels
         public DashboardViewModel(string dbPath, IAccountService accountService, IServiceProvider serviceProvider   )
         {
             _serviceProvider = serviceProvider;
+            // Set default tab
+            ShowIncome();
         }
 #pragma warning disable
 
