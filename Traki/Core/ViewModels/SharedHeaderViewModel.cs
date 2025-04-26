@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Core.Enum;
 using Core.Pages;
 using Core.Shared;
 using Core.Views;
@@ -24,23 +25,24 @@ namespace Core.ViewModels
         [ObservableProperty] private bool isMonthFilterSelected;
         [ObservableProperty] private bool isWeekFilterSelected;
         [ObservableProperty] private bool isYearFilterSelected;
-        [ObservableProperty] private string? selectedFilterOption;
+        [ObservableProperty] private FilterOption? selectedFilterOption;
         [ObservableProperty]
         private bool isFilterExpanded = false;
         [ObservableProperty]
         private ObservableCollection<Account>? listOfAccounts = new();
         [ObservableProperty]
         private Account? selectedAccount = new();
-        [ObservableProperty]
-        private ObservableCollection<string> filterOptions = new()
-        {
-            "Day",
-            "Week",
-            "Month",
-            "Year",
-            "Interval",
-            "Choose Date"
-        };
+        //[ObservableProperty]
+        //private ObservableCollection<string> filterOptions = new()
+        //{
+        //    "All",
+        //    "Day",
+        //    "Week",
+        //    "Month",
+        //    "Year",
+        //    "Interval",
+        //    "Choose Date"
+        //};
         public ObservableCollection<string> Months { get; } = new(
        CultureInfo.CurrentCulture.DateTimeFormat.MonthNames
 .Where(m => !string.IsNullOrEmpty(m))
@@ -63,15 +65,41 @@ namespace Core.ViewModels
         private DateTime toDate = DateTime.Today;
         [ObservableProperty]
         private DateTime onDate;
-#pragma warning restore 
 
-        public bool IsAnyFilterVisible =>
+        [ObservableProperty]
+        private bool isAnyFilterVisible =>
             IsWeekFilterSelected || IsMonthFilterSelected || IsYearFilterSelected || IsIntervalFilterSelected || IsDateFilterSelected;
+#pragma warning restore
 
-        partial void OnSelectedFilterOptionChanged(string? value)
+
+        public ObservableCollection<FilterOption> FilterOptions { get; } = new(
+   System.Enum.GetValues(typeof(FilterOption)).Cast<FilterOption>());
+
+        partial void OnSelectedFilterOptionChanged(FilterOption? value)
         {
-            // your logic...
-            PublishFilterChanged();
+            if (value != null && value == FilterOption.All)
+            {
+                var filterState = new FilterState
+                {
+                    SelectedFilterOption = selectedFilterOption,
+                    SelectedAccount = SelectedAccount,
+
+                    SelectedMonth = SelectedMonth,
+                    SelectedWeek = SelectedWeek,
+                    SelectedYear = SelectedYear,
+                    FromDate = FromDate,
+                    ToDate = ToDate,
+                    OnDate = OnDate,
+                };
+                // Notify the client
+                PublishFilterChanged(filterState);
+            }
+
+            IsDateFilterSelected = value == FilterOption.ChooseDate;
+            IsIntervalFilterSelected = value == FilterOption.Interval;
+            IsMonthFilterSelected = value == FilterOption.Month;
+            IsWeekFilterSelected = value == FilterOption.Week;
+            IsYearFilterSelected = value == FilterOption.Year;
         }
 
         #endregion Filter
@@ -84,9 +112,12 @@ namespace Core.ViewModels
         public SharedHeaderViewModel(string dbPath, IAccountService accountService)
         {
             this._accountService = accountService;
+            // Select the first value by default
+            SelectedFilterOption = FilterOptions.First();
         }
         #endregion Constructor
 
+        #region Private Methods
         [RelayCommand]
         private async Task ToggleFilter()
         {
@@ -94,6 +125,15 @@ namespace Core.ViewModels
             await this.LoadAccountsAsync(0);
         }
 
+        private void PublishFilterChanged(FilterState filterState)
+        {
+            //WeakReferenceMessenger.Default.Send(new FilterChangedMessage(filterState));
+            StrongReferenceMessenger.Default.Send(new FilterChangedMessage((filterState)));
+        }
+
+        #endregion Private Methods
+
+        #region Public Methods
         public async Task LoadAccountsAsync(int accountId)
         {
             if (_accountService != null)
@@ -115,29 +155,14 @@ namespace Core.ViewModels
             }
         }
 
-        private void PublishFilterChanged()
-        {
-            var filterState = new FilterState
-            {
-                SelectedFilterOption = SelectedFilterOption,
-                SelectedMonth = SelectedMonth,
-                SelectedWeek = SelectedWeek,
-                SelectedYear = SelectedYear,
-                FromDate = FromDate,
-                ToDate = ToDate,
-                OnDate = OnDate,
-                SelectedAccount = SelectedAccount
-            };
-
-            //WeakReferenceMessenger.Default.Send(new FilterChangedMessage(filterState));
-            StrongReferenceMessenger.Default.Send(new FilterChangedMessage((filterState)));
-
-        }
-
         public void UnregisterMessenger()
         {
             StrongReferenceMessenger.Default.UnregisterAll(this);
         }
+
+        #endregion Public Methods
+
+        #region Events
 
         partial void OnSelectedAccountChanged(Account? value)
         {
@@ -159,11 +184,68 @@ namespace Core.ViewModels
                     Shell.Current.GoToAsync(nameof(ManageAccountsPage));
                 }
 
-                PublishFilterChanged();
+
+                var filterState = new FilterState
+                {
+                    SelectedFilterOption = selectedFilterOption,
+                    SelectedAccount = SelectedAccount,
+
+                    SelectedMonth = SelectedMonth,
+                    SelectedWeek = SelectedWeek,
+                    SelectedYear = SelectedYear,
+                    FromDate = FromDate,
+                    ToDate = ToDate,
+                    OnDate = OnDate,
+                };
+                PublishFilterChanged(filterState);
             }
             //SelectedCategoryBreakdown = null;
             //this.RefreshDataAsync();
         }
+
+        #endregion Events
+
+        #region Commands
+        [RelayCommand]
+        public void FilterTransactions()
+        {
+            //if (string.IsNullOrWhiteSpace(SelectedWeek) || SelectedYear == 0)
+            //    return;
+
+            //// Extract the number from the string like "Week 12"
+            //if (!int.TryParse(SelectedWeek.Replace("Week ", ""), out int week) || week <= 0)
+            //    return;
+
+            //int year = SelectedYear;
+
+            //// Get the first Monday of the year
+            //DateTime jan1 = new DateTime(year, 1, 1);
+            //int daysOffset = DayOfWeek.Monday - jan1.DayOfWeek;
+            //DateTime firstMonday = jan1.AddDays(daysOffset >= 0 ? daysOffset : daysOffset + 7);
+
+            //DateTime startOfWeek = firstMonday.AddDays((week - 1) * 7);
+            //DateTime endOfWeek = startOfWeek.AddDays(6);
+
+            //// Clamp to correct year boundaries
+            //if (startOfWeek.Year < year) startOfWeek = new DateTime(year, 1, 1);
+            //if (endOfWeek.Year > year) endOfWeek = new DateTime(year, 12, 31);
+
+                var filterState = new FilterState
+                {
+                    SelectedFilterOption = selectedFilterOption,
+                    SelectedAccount = SelectedAccount,
+                    SelectedWeek = SelectedWeek,
+                    SelectedYear = SelectedYear,
+
+                    SelectedMonth = SelectedMonth,
+                    FromDate = FromDate,
+                    ToDate = ToDate,
+                    OnDate = OnDate,
+                };
+                PublishFilterChanged(filterState);
+            //FilterTransactionsByRange(startOfWeek, endOfWeek);
+        }
+        #endregion
 
     }
 }

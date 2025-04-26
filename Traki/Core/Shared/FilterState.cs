@@ -1,10 +1,11 @@
-﻿using TrakiLibrary.Models;
+﻿using Core.Enum;
+using TrakiLibrary.Models;
 
 namespace Core.Shared
 {
     public class FilterState
     {
-        public string? SelectedFilterOption { get; set; }
+        public FilterOption? SelectedFilterOption { get; set; }
         public string? SelectedMonth { get; set; }
         public string? SelectedWeek { get; set; }
         public int SelectedYear { get; set; }
