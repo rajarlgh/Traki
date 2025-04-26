@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Core.Pages;
 using Core.Shared;
 using Core.Views;
+using Microsoft.Maui.ApplicationModel.Communication;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -128,7 +129,14 @@ namespace Core.ViewModels
                 SelectedAccount = SelectedAccount
             };
 
-            WeakReferenceMessenger.Default.Send(new FilterChangedMessage(filterState));
+            //WeakReferenceMessenger.Default.Send(new FilterChangedMessage(filterState));
+            StrongReferenceMessenger.Default.Send(new FilterChangedMessage((filterState)));
+
+        }
+
+        public void UnregisterMessenger()
+        {
+            StrongReferenceMessenger.Default.UnregisterAll(this);
         }
 
         partial void OnSelectedAccountChanged(Account? value)
@@ -150,6 +158,8 @@ namespace Core.ViewModels
                 {
                     Shell.Current.GoToAsync(nameof(ManageAccountsPage));
                 }
+
+                PublishFilterChanged();
             }
             //SelectedCategoryBreakdown = null;
             //this.RefreshDataAsync();

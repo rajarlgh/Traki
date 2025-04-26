@@ -14,7 +14,12 @@ namespace Core.ViewModels
         {
             _dbPath = dbPath;
             _transactionService = transactionService;
-            WeakReferenceMessenger.Default.Register(this);
+            //WeakReferenceMessenger.Default.Register<IncomeViewModel, FilterChangedMessage>(this, 
+            //    (r, m) => r.Receive(m));
+
+            //StrongReferenceMessenger.Default.Register<IncomeViewModel, FilterChangedMessage>(this, (r, m) => r.Receive(m));
+            StrongReferenceMessenger.Default.Register(this);
+
         }
 
         public void Receive(FilterChangedMessage message)

@@ -1,3 +1,4 @@
+using Core.ViewModels;
 using Core.Views;
 using Traki.ViewModels;
 
@@ -26,4 +27,15 @@ public partial class DashboardPage : ContentPage
         if (SharedHeaderControl != null)
             await SharedHeaderControl.ReloadAccountsAsync();
     }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        if (SharedHeaderControl.BindingContext is SharedHeaderViewModel vm)
+        {
+            vm.UnregisterMessenger();
+        }
+    }
+
 }
