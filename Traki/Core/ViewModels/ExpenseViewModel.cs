@@ -2,7 +2,7 @@
 
 namespace Core.ViewModels
 {
-    internal class ExpenseViewModel : ObservableObject
+    public partial class ExpenseViewModel : ObservableObject
     {
 
     }

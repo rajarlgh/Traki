@@ -7,6 +7,50 @@
              Title="Dashboard Page">
     <VerticalStackLayout>
 
+        <!-- Header Section -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, Auto" Padding="10" ColumnSpacing="10">
+            <Button  Text="Upload Pdf"                   
+                    Grid.Column="0" 
+                    WidthRequest="70" 
+                   HeightRequest="50" 
+                   CornerRadius="25"
+                   BorderColor="Orange"
+                   BorderWidth="7"
+                   BackgroundColor="Transparent"
+                   TextColor="Red"
+                    Command="{Binding UploadExcelCommand}"
+                    Style="{StaticResource OutlineButtonStyle}"
+                    FontSize="10"
+                   
+                    />
+
+            <Button Text="Download"
+                    Grid.Column="1" 
+                    Command="{Binding DownloadExcelCommand}"
+                    FontSize="10"
+                    Style="{StaticResource OutlineButtonStyle}"
+                    BorderColor="Blue"
+                    BorderWidth="5"
+                    TextColor="Red"
+                    CornerRadius="25"
+                    WidthRequest="70"
+                    HeightRequest="50" />
+
+            <Label Text="Balance:"
+                   Grid.Column="2"
+                   FontAttributes="Bold"
+                   VerticalTextAlignment="Center"
+                   HorizontalTextAlignment="End"
+                   FontSize="15" />
+
+            <Label Text="{Binding Balance}"
+                   Grid.Column="3"
+                   FontAttributes="Bold"
+                   VerticalTextAlignment="Center"
+                   FontSize="15" />
+        </Grid>
+
+        
         <!-- Shared Header -->
         <coreControls:SharedHeaderView x:Name="SharedHeaderControl"> </coreControls:SharedHeaderView >
 

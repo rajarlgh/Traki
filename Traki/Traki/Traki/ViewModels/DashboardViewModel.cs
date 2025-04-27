@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Core.Pages;
 using Core.ViewModels;
 using Core.Views;
 using TrakiLibrary.Interfaces;
@@ -10,7 +11,7 @@ namespace Traki.ViewModels
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public DashboardViewModel(string dbPath, IAccountService accountService, IServiceProvider serviceProvider   )
+        public DashboardViewModel(IAccountService accountService, IServiceProvider serviceProvider   )
         {
             _serviceProvider = serviceProvider;
             // Set default tab
@@ -41,6 +42,18 @@ namespace Traki.ViewModels
         private void ShowTransactions()
         {
             SelectedTabView = new TransactionView();
+        }
+
+        [RelayCommand]
+        private void UploadExcel()
+        {
+            Shell.Current.GoToAsync($"{nameof(ExcelUploaderPage)}?type=Expense");
+        }
+
+        [RelayCommand]
+        private void DownloadExcel()
+        {
+
         }
     }
 }

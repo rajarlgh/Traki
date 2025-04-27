@@ -14,7 +14,6 @@ namespace Core.ViewModels
     public partial class IncomeViewModel : ObservableObject, IRecipient<FilterChangedMessage>
     {
         #region Private Variables
-        private readonly string _dbPath;
         private readonly ITransactionService _transactionService;
         #endregion Private Variables
 
@@ -26,9 +25,8 @@ namespace Core.ViewModels
 #pragma warning restore
 
         #region Public Constructor
-        public IncomeViewModel(string dbPath, ITransactionService transactionService)
+        public IncomeViewModel(ITransactionService? transactionService)
         {
-            _dbPath = dbPath;
             _transactionService = transactionService;
             //WeakReferenceMessenger.Default.Register<IncomeViewModel, FilterChangedMessage>(this, 
             //    (r, m) => r.Receive(m));

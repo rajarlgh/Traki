@@ -1,5 +1,5 @@
 ﻿using Core.Pages;
-using Core.Views;
+using Traki.Pages;
 
 namespace Traki
 {
@@ -9,6 +9,7 @@ namespace Traki
         {
             InitializeComponent();
             Routing.RegisterRoute(nameof(ManageAccountsPage), typeof(ManageAccountsPage));
+            Routing.RegisterRoute(nameof(ExcelUploaderPage), typeof(ExcelUploaderPage));
         }
     }
 }

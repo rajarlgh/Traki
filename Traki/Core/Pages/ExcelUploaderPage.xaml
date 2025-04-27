@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Core.Pages.ExcelUploaderPage"
+             Title="ExcelUploaderPage">
+    <VerticalStackLayout Padding="10" Spacing="20">
+
+        <!-- File Path Display and Buttons -->
+        <HorizontalStackLayout>
+            <Entry Text="{Binding SelectedFilePath}" Placeholder="Select an Excel file" IsReadOnly="True" HorizontalOptions="FillAndExpand" />
+            <Button Text="Browse" Command="{Binding BrowseCommand}" />
+        </HorizontalStackLayout>
+
+        <Button Text="Upload" Command="{Binding UploadCommand}" IsEnabled="{Binding CanUpload}" />
+
+        <ActivityIndicator IsRunning="{Binding IsUploading}" 
+                   IsVisible="{Binding IsUploading}" 
+                   Color="DarkBlue"
+                   HeightRequest="40" 
+                   WidthRequest="40" 
+                   HorizontalOptions="Center" />
+
+        <ProgressBar Progress="{Binding UploadProgress}"
+             IsVisible="{Binding IsUploading}"
+             HeightRequest="20" />
+
+        <Label Text="{Binding UploadStatus}"
+       IsVisible="{Binding IsUploading}"
+       HorizontalOptions="Center" />
+
+
+
+    </VerticalStackLayout>
+</ContentPage>

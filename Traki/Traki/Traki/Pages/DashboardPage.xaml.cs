@@ -1,5 +1,4 @@
 using Core.ViewModels;
-using Core.Views;
 using Traki.ViewModels;
 
 namespace Traki.Pages;

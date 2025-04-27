@@ -109,7 +109,7 @@ namespace Core.ViewModels
         #endregion DB
 
         #region Constructor
-        public SharedHeaderViewModel(string dbPath, IAccountService accountService)
+        public SharedHeaderViewModel(IAccountService accountService)
         {
             this._accountService = accountService;
             // Select the first value by default
@@ -209,30 +209,9 @@ namespace Core.ViewModels
         [RelayCommand]
         public void FilterTransactions()
         {
-            //if (string.IsNullOrWhiteSpace(SelectedWeek) || SelectedYear == 0)
-            //    return;
-
-            //// Extract the number from the string like "Week 12"
-            //if (!int.TryParse(SelectedWeek.Replace("Week ", ""), out int week) || week <= 0)
-            //    return;
-
-            //int year = SelectedYear;
-
-            //// Get the first Monday of the year
-            //DateTime jan1 = new DateTime(year, 1, 1);
-            //int daysOffset = DayOfWeek.Monday - jan1.DayOfWeek;
-            //DateTime firstMonday = jan1.AddDays(daysOffset >= 0 ? daysOffset : daysOffset + 7);
-
-            //DateTime startOfWeek = firstMonday.AddDays((week - 1) * 7);
-            //DateTime endOfWeek = startOfWeek.AddDays(6);
-
-            //// Clamp to correct year boundaries
-            //if (startOfWeek.Year < year) startOfWeek = new DateTime(year, 1, 1);
-            //if (endOfWeek.Year > year) endOfWeek = new DateTime(year, 12, 31);
-
                 var filterState = new FilterState
                 {
-                    SelectedFilterOption = selectedFilterOption,
+                    SelectedFilterOption = this.SelectedFilterOption,
                     SelectedAccount = SelectedAccount,
                     SelectedWeek = SelectedWeek,
                     SelectedYear = SelectedYear,

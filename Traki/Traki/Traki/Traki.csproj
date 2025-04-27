@@ -22,6 +22,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Pages\ExcelUploaderPage.xaml.cs" />
+	  <Compile Remove="ViewModels\ExcelUploaderViewModel.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Remove="Pages\ExcelUploaderPage.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
 	</ItemGroup>
@@ -34,6 +43,10 @@
 	  <MauiXaml Update="Pages\DashboardPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="ViewModels\" />
 	</ItemGroup>
 
 </Project>

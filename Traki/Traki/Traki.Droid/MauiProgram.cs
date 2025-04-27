@@ -16,34 +16,50 @@ namespace Traki.Droid
         {
             var builder = MauiApp.CreateBuilder();
 
-            // Determine the database path based on the platform
             string? dbPath = GetDatabasePath();
+
+            // 🛠️ Register SKCanvasView Handler
+            builder.ConfigureMauiHandlers(handlers =>
+            {
+                handlers.AddHandler<SkiaSharp.Views.Maui.Controls.SKCanvasView, SkiaSharp.Views.Maui.Handlers.SKCanvasViewHandler>();
+            });
 
             RegisterService<IAccountService, AccountService>(builder, dbPath);
             RegisterService<ITransactionService, TransactionService>(builder, dbPath);
+            RegisterService<ICategoryService, CategoryService>(builder, dbPath);
 
             builder.UseSharedMauiApp();
 
-            // Register the page and ViewModel with the dbPath
-            RegisterPageWithViewModel<SharedHeaderViewModel, SharedHeaderView>(builder, dbPath);
+            RegisterPageWithViewModel<SharedHeaderViewModel, SharedHeaderView>(builder);
             RegisterPageWithViewModel<ManageAccountsViewModel, ManageAccountsPage>(builder);
-
-            //RegisterPageWithViewModel<Traki.ViewModels.DashboardViewModel, DashboardPage>(builder, dbPath);
+            RegisterPageWithViewModel<ExcelUploaderViewModel, ExcelUploaderPage>(builder);
+            RegisterPageWithViewModel<IncomeViewModel, IncomeView>(builder);
             builder.Services.AddSingleton<DashboardViewModel>(provider =>
             {
                 var service = provider.GetRequiredService<IAccountService>();
-                return new DashboardViewModel(dbPath, service, provider);
-            });
-            builder.Services.AddSingleton<IncomeViewModel>(provider =>
-            {
-                var service = provider.GetRequiredService<ITransactionService>();
-                return new IncomeViewModel(dbPath, service);
+                return new DashboardViewModel(service, provider);
             });
 
+            //builder.Services.AddSingleton<IncomeViewModel>(provider =>
+            //{
+            //    var service = provider.GetRequiredService<ITransactionService>();
+            //    return new IncomeViewModel(dbPath, service);
+            //});
+
+            //builder.Services.AddSingleton<ExcelUploaderViewModel>(provider =>
+            //{
+            //    var transactionService = provider.GetRequiredService<ITransactionService>();
+            //    var accountService = provider.GetRequiredService<IAccountService>();
+            //    var categoryService = provider.GetRequiredService<ICategoryService>();
+            //    return new ExcelUploaderViewModel(transactionService, accountService, categoryService);
+            //});
+
             builder.Services.AddSingleton<DashboardPage>();
+            builder.Services.AddSingleton<ExcelUploaderPage>();
 
             return builder.Build();
         }
+
 
         private static void RegisterService<TInterface, TImplementation>(MauiAppBuilder builder, string? dbPath = null)
     where TInterface : class
