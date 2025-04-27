@@ -38,8 +38,8 @@
                                         <DataTemplate>
                                             <Border Padding="10" Margin="5" BackgroundColor="Transparent">
                                                 <Grid ColumnDefinitions="Auto,Auto">
-                                                    <Label Text="{Binding Entry.Label}" FontAttributes="Bold" Grid.Column="0" />
-                                                    <Label Text="{Binding Entry.ValueLabel}" FontSize="Small" Grid.Column="1"/>
+                                                    <Label Text="{Binding Label}" FontAttributes="Bold" Grid.Column="0" />
+                                                    <Label Text="{Binding ValueLabel}" FontSize="Small" Grid.Column="1"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>

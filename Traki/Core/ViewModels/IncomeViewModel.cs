@@ -8,6 +8,7 @@ using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using TrakiLibrary.Interfaces;
+using TrakiLibrary.Models;
 
 namespace Core.ViewModels
 {
@@ -130,7 +131,7 @@ namespace Core.ViewModels
                 toDate = filter.ToDate;
             }
 
-            FilterTransactionsByRange(fromDate, toDate, filter.SelectedAccount.Id);
+            FilterTransactionsByRange(fromDate, toDate, filter.SelectedAccount.Id, option);
 
 
             //else
@@ -147,41 +148,50 @@ namespace Core.ViewModels
 
         }
 
-        private async void FilterTransactionsByRange(DateTime fromDate, DateTime toDate, int accountId)
+        private async void FilterTransactionsByRange(DateTime fromDate, DateTime toDate, int accountId, FilterOption? filterOption)
         {
 
             var transactions = await _transactionService.GetTransactionsAsync();
-            //if (accountId > 0)
-            //{
-            //    var filteredTransactions = transactions.Where(t => t.Date >= fromDate && t.Date <= toDate && t.AccountId == accountId);
-            //}
-            //else
-            //{
-            //    var filteredTransactions = transactions.Where(t => t.Date >= fromDate && t.Date <= toDate);
-            //}
-            //allTransactions = new ObservableCollection<Transaction>(data);
+            var filteredTransactions = new List<Transaction>();
 
-            var incomeGroupedData = transactions
-               .Where(t => t.Category != null && t.Type == "Income")
-               .GroupBy(t => t.Category.Id)
+            if (filterOption != FilterOption.All) {
+                if (accountId > 0)
+                {
+                    filteredTransactions = transactions
+                        .Where(t => t.Date >= fromDate && t.Date <= toDate && t.AccountId == accountId)
+                        .ToList();
+                }
+                else
+                {
+                    filteredTransactions = transactions
+                        .Where(t => t.Date >= fromDate && t.Date <= toDate)
+                        .ToList();
+                }
+            }
+            else
+            { filteredTransactions = transactions; }
+
+            var incomeGroupedData = filteredTransactions
+               .Where(t => t.Type == "Income")
+               .GroupBy(t => t.CategoryId)
                .Select(g =>
                {
                    var first = g.First();
                    return new
                    {
                        CategoryId = g.Key,
-                       CategoryName = first.Category.Name,
+                       CategoryName = first.Category?.Name,
                        TotalAmount = g.Sum(t => t.Amount)
                    };
                });
-
+            var t = incomeGroupedData.Count();
             var incomeData = incomeGroupedData.Select(data => new ChartEntryWrapper
             {
-                
-                    Label = data.CategoryName,
-                    ValueLabel = data.TotalAmount.ToString("F0"),
-                    Color = GetCategoryColor(data.CategoryName?? string.Empty),
-                    CategoryId = data.CategoryId,
+
+                Label = data.CategoryName,
+                ValueLabel = data.TotalAmount.ToString("F0"),
+                Color = GetCategoryColor(data.CategoryName ?? string.Empty),
+                CategoryId = data.CategoryId,
             }).ToList();
 
             // Set collection of ChartEntryWrapper for CollectionView
