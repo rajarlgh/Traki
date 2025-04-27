@@ -268,5 +268,16 @@ namespace Core.ViewModels
 
 
         #endregion Private Methods
+
+        #region Public Methods
+        public void Reset()
+        {
+            SelectedFilePath = null;
+            CanUpload = false;
+            IsUploading = false;
+            UploadProgress = 0;
+            UploadStatus = null;
+        }
+        #endregion Public Methods
     }
 }
