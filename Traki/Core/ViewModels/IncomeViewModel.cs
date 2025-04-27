@@ -15,7 +15,9 @@ namespace Core.ViewModels
     public partial class IncomeViewModel : ObservableObject, IRecipient<FilterChangedMessage>
     {
         #region Private Variables
-        private readonly ITransactionService _transactionService;
+        private readonly ITransactionService? _transactionService;
+        private readonly ICategoryService? _categoryService;
+
         #endregion Private Variables
 
 #pragma warning disable
@@ -26,9 +28,10 @@ namespace Core.ViewModels
 #pragma warning restore
 
         #region Public Constructor
-        public IncomeViewModel(ITransactionService? transactionService)
+        public IncomeViewModel(ITransactionService? transactionService, ICategoryService? categoryService)
         {
             _transactionService = transactionService;
+            _categoryService = categoryService;
             //WeakReferenceMessenger.Default.Register<IncomeViewModel, FilterChangedMessage>(this, 
             //    (r, m) => r.Receive(m));
 
@@ -154,7 +157,8 @@ namespace Core.ViewModels
             var transactions = await _transactionService.GetTransactionsAsync();
             var filteredTransactions = new List<Transaction>();
 
-            if (filterOption != FilterOption.All) {
+            if (filterOption != FilterOption.All)
+            {
                 if (accountId > 0)
                 {
                     filteredTransactions = transactions
@@ -171,19 +175,24 @@ namespace Core.ViewModels
             else
             { filteredTransactions = transactions; }
 
+            var categories = await _categoryService.GetCategoriesAsync();
             var incomeGroupedData = filteredTransactions
-               .Where(t => t.Type == "Income")
-               .GroupBy(t => t.CategoryId)
-               .Select(g =>
-               {
-                   var first = g.First();
-                   return new
-                   {
-                       CategoryId = g.Key,
-                       CategoryName = first.Category?.Name,
-                       TotalAmount = g.Sum(t => t.Amount)
-                   };
-               });
+                .Where( t => t.Type == "Income" && t.CategoryId != null)
+                .GroupBy(t => t.CategoryId)
+                .Select(g =>
+                {
+                    var categoryId = g.Key;
+                    var categoryName = categories.FirstOrDefault(c => c.Id == categoryId)?.Name;
+
+                    return new
+                    {
+                        CategoryId = categoryId,
+                        CategoryName = categoryName,
+                        TotalAmount = g.Sum(t => t.Amount)
+                    };
+                })
+                .ToList();
+
             var t = incomeGroupedData.Count();
             var incomeData = incomeGroupedData.Select(data => new ChartEntryWrapper
             {
