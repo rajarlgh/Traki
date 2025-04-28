@@ -24,8 +24,9 @@
                             <Button Text="{Binding IsIncomeExpanded, Converter={StaticResource BooleanToTextConverter}}"
                                     Command="{Binding ToggleIncomeCommand}" />
 
-
-                            <Grid RowDefinitions="Auto, Auto" Padding="10" IsVisible="{Binding IsIncomeExpanded}" >
+                        <ScrollView  HeightRequest="200" >
+                            <Grid RowDefinitions="*, *" Padding="10" IsVisible="{Binding IsIncomeExpanded}" 
+                              >
                                 <CollectionView x:Name="collectionViewIncome"
                                             ItemsSource="{Binding IncomeChartEntryWrappers}"
                                             IsVisible="{Binding DoVisibleChart, Converter={StaticResource InverseBooleanConverter}}"
@@ -37,7 +38,7 @@
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <Border Padding="10" Margin="5" BackgroundColor="Transparent">
-                                                <Grid ColumnDefinitions="Auto,Auto">
+                                                <Grid ColumnDefinitions="*,*"  ColumnSpacing="10">
                                                     <Label Text="{Binding Label}" FontAttributes="Bold" Grid.Column="0" />
                                                     <Label Text="{Binding ValueLabel}" FontSize="Small" Grid.Column="1"/>
                                                 </Grid>
@@ -46,14 +47,15 @@
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
 
-                                <Grid IsVisible="{Binding DoVisibleChart}" Grid.Row="1" Padding="10">
+                                <Grid IsVisible="True" Grid.Row="1" Padding="10">
                                     <Label Text="Income Chart" FontSize="24" HorizontalOptions="Center" />
                                     <views:BindableChartView Entries="{Binding IncomeChartEntryWrappers}"
-                                                                HeightRequest="200"
+                                                                HeightRequest="220"
                                                                 WidthRequest="300" />
                                 </Grid>
                             </Grid>
-                        </StackLayout>
+                        </ScrollView>
+                    </StackLayout>
                     </views:CardView>
 
                 </StackLayout>

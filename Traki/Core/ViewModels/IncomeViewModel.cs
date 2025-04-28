@@ -25,6 +25,10 @@ namespace Core.ViewModels
         private bool isIncomeExpanded = false;
         [ObservableProperty]
         private ObservableCollection<ChartEntryWrapper> incomeChartEntryWrappers;
+        [ObservableProperty]
+        private bool doVisibleChart = false;
+        [ObservableProperty]
+        private IncomeDisplayMode incomeDisplayMode = IncomeDisplayMode.Chart;
 #pragma warning restore
 
         #region Public Constructor
@@ -199,12 +203,16 @@ namespace Core.ViewModels
 
                 Label = data.CategoryName,
                 ValueLabel = data.TotalAmount.ToString("F0"),
+                Value = (float)data.TotalAmount, // 👈 SET THIS
                 Color = GetCategoryColor(data.CategoryName ?? string.Empty),
                 CategoryId = data.CategoryId,
             }).ToList();
 
             // Set collection of ChartEntryWrapper for CollectionView
             IncomeChartEntryWrappers = new ObservableCollection<ChartEntryWrapper>(incomeData);
+
+            //if (incomeData.Count > 0)
+            //    doVisibleChart = !this.doVisibleChart;
 
             // Recreate charts
             //IncomeChart = CreateChart(IncomeChartEntryWrappers);
@@ -256,7 +264,15 @@ namespace Core.ViewModels
         private void ToggleIncome()
         {
             IsIncomeExpanded = !IsIncomeExpanded;
+            //this.ToggleIncomeDisplayMode();
         }
+        //[RelayCommand]
+        //private void ToggleIncomeDisplayMode()
+        //{
+        //    IncomeDisplayMode = IncomeDisplayMode == IncomeDisplayMode.Chart
+        //        ? IncomeDisplayMode.List
+        //        : IncomeDisplayMode.Chart;
+        //}
         #endregion 
     }
 }

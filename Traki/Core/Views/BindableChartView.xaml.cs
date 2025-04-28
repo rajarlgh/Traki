@@ -26,11 +26,14 @@ public partial class BindableChartView : ContentView
         InitializeComponent();
     }
 
+    private IEnumerable<ChartEntryWrapper> _entriesCache;
+
     private static void OnEntriesChanged(BindableObject bindable, object oldValue, object newValue)
     {
         if (bindable is BindableChartView view)
         {
-            view.ChartCanvas.InvalidateSurface(); // Redraw
+            view._entriesCache = (IEnumerable<ChartEntryWrapper>)newValue; // cache it properly!
+            view.ChartCanvas.InvalidateSurface();
         }
     }
 
@@ -39,23 +42,24 @@ public partial class BindableChartView : ContentView
         var canvas = e.Surface.Canvas;
         canvas.Clear(SKColors.White);
 
-        if (Entries == null || !Entries.Any()) return;
+        if (_entriesCache == null || !_entriesCache.Any()) return;
 
         float centerX = e.Info.Width / 2f;
         float centerY = e.Info.Height / 2f;
-        float radius = Math.Min(centerX, centerY) - 10;
+        float strokeWidth = 50f;
+        float radius = Math.Min(centerX, centerY) - (strokeWidth / 2) - 10; // adjust radius for stroke width
+
         float startAngle = -90f;
+        float total = _entriesCache.Sum(entry => entry.Value);
 
-        float total = Entries.Sum(entry => entry.Value);
-
-        foreach (var entry in Entries)
+        foreach (var entry in _entriesCache)
         {
             float sweepAngle = (entry.Value / total) * 360f;
 
             using var paint = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
-                StrokeWidth = 40,
+                StrokeWidth = strokeWidth,
                 Color = entry.Color,
                 IsAntialias = true
             };

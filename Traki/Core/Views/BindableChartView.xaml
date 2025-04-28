@@ -6,6 +6,7 @@
 
     <VerticalStackLayout>
         <skia:SKCanvasView x:Name="ChartCanvas"
+                           Margin="0,40,0,0"
                            HeightRequest="200"
                            HorizontalOptions="Fill"
                            PaintSurface="OnPaintSurface" />
