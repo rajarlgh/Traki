@@ -28,6 +28,8 @@ namespace Core.ViewModels
         [ObservableProperty]
         private bool doVisibleChart = false;
         [ObservableProperty]
+        private bool showChartVisible;
+        [ObservableProperty]
         private IncomeDisplayMode incomeDisplayMode = IncomeDisplayMode.Chart;
 #pragma warning restore
 
@@ -52,8 +54,10 @@ namespace Core.ViewModels
             // Use filter.SelectedFilterOption, etc. to update IncomeChartEntryWrappers
             UpdateIncomeChart(filter);
         }
-
-
+        private void PublishAccountChanged(AccountDetails accountDetails)
+        {
+            StrongReferenceMessenger.Default.Send(new AccountChangedMessage((accountDetails)));
+        }
         #endregion Public Methods
 
         #region Private Methods
@@ -68,10 +72,6 @@ namespace Core.ViewModels
 
             var fromDate = filter.FromDate;
             var toDate = filter.ToDate;
-
-
-
-            
 
             if (option == FilterOption.All)
             {
@@ -139,26 +139,18 @@ namespace Core.ViewModels
             }
 
             FilterTransactionsByRange(fromDate, toDate, filter.SelectedAccount.Id, option);
-
-
-            //else
-            //    filteredTransactions = filteredTransactions.Where(t => t.Date >= startDate && t.Date <= endDate);
-            //var data = filteredTransactions.ToListAsync().Result;
-            //allTransactions = new ObservableCollection<Transaction>(data);
-
-            //// Execute the query and update the Transactions list
-            //Transactions = new ObservableCollection<Transaction>(data);
-
-            //CalculateBalances();
-            //OnPropertyChanged(nameof(Transactions));
-            //this.LoadTransactionsAndSetGrid(Transactions);
-
         }
 
         private async void FilterTransactionsByRange(DateTime fromDate, DateTime toDate, int accountId, FilterOption? filterOption)
         {
 
             var transactions = await _transactionService.GetTransactionsAsync();
+            if (transactions == null)
+            {
+                return;
+            }
+            var accountDetails = new AccountDetails() { Transactions = transactions };
+            this.PublishAccountChanged(accountDetails);
             var filteredTransactions = new List<Transaction>();
 
             if (filterOption != FilterOption.All)
@@ -264,15 +256,16 @@ namespace Core.ViewModels
         private void ToggleIncome()
         {
             IsIncomeExpanded = !IsIncomeExpanded;
-            //this.ToggleIncomeDisplayMode();
+            this.ToggleIncomeDisplayMode();
         }
-        //[RelayCommand]
-        //private void ToggleIncomeDisplayMode()
-        //{
-        //    IncomeDisplayMode = IncomeDisplayMode == IncomeDisplayMode.Chart
-        //        ? IncomeDisplayMode.List
-        //        : IncomeDisplayMode.Chart;
-        //}
+        [RelayCommand]
+        private void ToggleIncomeDisplayMode()
+        {
+            IncomeDisplayMode = IncomeDisplayMode == IncomeDisplayMode.Chart
+                ? IncomeDisplayMode.List
+                : IncomeDisplayMode.Chart;
+            this.ShowChartVisible = IncomeDisplayMode == IncomeDisplayMode.Chart;
+        }
         #endregion 
     }
 }

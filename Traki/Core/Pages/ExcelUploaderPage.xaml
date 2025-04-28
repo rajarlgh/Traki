@@ -2,14 +2,22 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Core.Pages.ExcelUploaderPage"
+             xmlns:vm="clr-namespace:Core.ViewModels"
+             x:DataType="vm:ExcelUploaderViewModel"
              Title="ExcelUploaderPage">
     <VerticalStackLayout Padding="10" Spacing="20">
 
         <!-- File Path Display and Buttons -->
         <HorizontalStackLayout>
-            <Entry Text="{Binding SelectedFilePath}" Placeholder="Select an Excel file" IsReadOnly="True" HorizontalOptions="FillAndExpand" />
-            <Button Text="Browse" Command="{Binding BrowseCommand}" />
+            <Entry 
+                Text="{Binding SelectedFilePath}" 
+                Placeholder="Select an Excel file" 
+                IsReadOnly="True" />
+            <Button 
+                Text="Browse" 
+                Command="{Binding BrowseCommand}" />
         </HorizontalStackLayout>
+
 
         <Button Text="Upload" Command="{Binding UploadCommand}" IsEnabled="{Binding CanUpload}" />
 

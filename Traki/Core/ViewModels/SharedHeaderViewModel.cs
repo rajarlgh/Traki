@@ -142,7 +142,6 @@ namespace Core.ViewModels
                 this.ListOfAccounts = new ObservableCollection<Account>(accounts);
                 this.ListOfAccounts.Add(new Account { Id = -1, Name = "All" });
                 this.ListOfAccounts.Add(new Account { Id = -2, Name = "Add New Account" });
-                OnPropertyChanged(nameof(ListOfAccounts));
                 var selectedAccount = accounts.FirstOrDefault(r => r.Id == accountId);
                 if (selectedAccount != null)
                 {
@@ -151,7 +150,6 @@ namespace Core.ViewModels
 
                 else
                     SelectedAccount = this.ListOfAccounts.FirstOrDefault(a => a.Id == -1);
-                OnPropertyChanged(nameof(SelectedAccount));
             }
         }
 
@@ -166,30 +164,18 @@ namespace Core.ViewModels
 
         partial void OnSelectedAccountChanged(Account? value)
         {
-            if (value != null && value.Id != -1) /*All - Selected in Account dropdown.*/
+            if (value != null)
             {
-                //    var account = this._accountService??.GetAccountsAsync();
-
-                //    var trans = allTransactions.Where(r => r.AccountId == value.Id).ToList();
-                //    Transactions = new ObservableCollection<Transaction>(trans);
-                //}
-                //else
-                //{
-                //    Transactions = new ObservableCollection<Transaction>(allTransactions);
-                //}
-                //LoadTransactionsAndSetGrid(Transactions);
-                //CalculateBalances();
-                if (value != null && value.Name == "Add New Account")
+                if (value.Name == "Add New Account")
                 {
                     Shell.Current.GoToAsync(nameof(ManageAccountsPage));
+                    return; // Early return to avoid publishing filter unnecessarily
                 }
-
 
                 var filterState = new FilterState
                 {
                     SelectedFilterOption = selectedFilterOption,
                     SelectedAccount = SelectedAccount,
-
                     SelectedMonth = SelectedMonth,
                     SelectedWeek = SelectedWeek,
                     SelectedYear = SelectedYear,
@@ -199,9 +185,8 @@ namespace Core.ViewModels
                 };
                 PublishFilterChanged(filterState);
             }
-            //SelectedCategoryBreakdown = null;
-            //this.RefreshDataAsync();
         }
+
 
         #endregion Events
 

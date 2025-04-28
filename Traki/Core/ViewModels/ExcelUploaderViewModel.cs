@@ -18,6 +18,7 @@ namespace Core.ViewModels
         #endregion Private Variables
 
         #region Observable Property
+#pragma warning disable
         [ObservableProperty]
         private string? selectedFilePath; //SelectedFilePath
 
@@ -32,6 +33,7 @@ namespace Core.ViewModels
 
         [ObservableProperty]
         private string? uploadStatus; //UploadProgress
+#pragma warning restore
 
         #endregion Observable Property
 

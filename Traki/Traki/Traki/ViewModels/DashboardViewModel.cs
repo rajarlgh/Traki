@@ -1,30 +1,51 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Core.Pages;
+using Core.Shared;
 using Core.ViewModels;
 using Core.Views;
 using TrakiLibrary.Interfaces;
+using TrakiLibrary.Models;
 
 namespace Traki.ViewModels
 {
-    public partial class DashboardViewModel : ObservableObject
+    public partial class DashboardViewModel : ObservableObject, IRecipient<AccountChangedMessage>   
     {
+        #region Private Variables
         private readonly IServiceProvider _serviceProvider;
+        
+#pragma warning disable
 
+        [ObservableProperty]
+        private View? selectedTabView;
+        [ObservableProperty]
+        public decimal balance;
+#pragma warning restore
+
+        #endregion Private Variables
+
+        #region Constructor
         public DashboardViewModel(IAccountService accountService, IServiceProvider serviceProvider   )
         {
             _serviceProvider = serviceProvider;
             // Set default tab
             ShowIncome();
+            //StrongReferenceMessenger.Default.Register(this);
+            StrongReferenceMessenger.Default.Register <AccountChangedMessage>(this);
         }
-#pragma warning disable
+        #endregion Constructor
 
-        [ObservableProperty]
-        private View? selectedTabView;
+        #region Public Methods
+        public void Receive(AccountChangedMessage accountChangedMessage)
+        {
+            var accountDetails = accountChangedMessage.Value;
+            CalculateBalances(accountDetails);
+        }
 
-#pragma warning restore
+        #endregion Public Methods
 
-
+        #region Commands
         [RelayCommand]
         private void ShowIncome()
         {
@@ -55,5 +76,20 @@ namespace Traki.ViewModels
         {
 
         }
+        #endregion Commands
+
+        #region Private Methods
+        private void CalculateBalances(AccountDetails accountDetails)
+        {
+            var _transactions = accountDetails.Transactions;
+            if (_transactions != null)
+            {
+                var totalIncome = _transactions.Where(t => t.Type == "Income").Sum(t => t.Amount);
+                var totalExpenses = _transactions.Where(t => t.Type == "Expense").Sum(t => t.Amount);
+
+                this.Balance = totalIncome + totalExpenses;
+            }
+        }
+        #endregion Private Methods
     }
 }

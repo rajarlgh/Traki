@@ -11,6 +11,7 @@
             <converters:BooleanToTextConverter x:Key="BooleanToTextConverter" />
         </ResourceDictionary>
     </ContentView.Resources>
+    
     <VerticalStackLayout>
         <!-- Main Content -->
         <ScrollView Grid.Row="2" Padding="0,0,0,10">
@@ -21,7 +22,8 @@
                         <StackLayout>
                             <Button Text="{Binding IsExpensesExpanded, Converter={StaticResource BooleanToTextConverter}}"
                                     Command="{Binding ToggleExpensesCommand}" />
-                            <Grid RowDefinitions="Auto, Auto" Padding="10" IsVisible="{Binding IsExpensesExpanded}">
+                        <ScrollView  HeightRequest="200" >
+                            <Grid RowDefinitions="*, *" Padding="10" IsVisible="{Binding IsExpensesExpanded}">
                                 <CollectionView x:Name="collectionViewExpense"
                                             ItemsSource="{Binding ExpenseChartEntryWrappers}"
                                             IsVisible="{Binding DoVisibleChart, Converter={StaticResource InverseBooleanConverter}}"
@@ -33,9 +35,9 @@
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <Border Padding="10" Margin="5" BackgroundColor="Transparent">
-                                                <Grid ColumnDefinitions="Auto,Auto">
-                                                    <Label Text="{Binding Entry.Label}" FontAttributes="Bold" Grid.Column="0" />
-                                                    <Label Text="{Binding Entry.ValueLabel}" FontSize="Small" Grid.Column="1"/>
+                                                <Grid ColumnDefinitions="*,*">
+                                                    <Label Text="{Binding Label}" FontAttributes="Bold" Grid.Column="0" />
+                                                    <Label Text="{Binding ValueLabel}" FontSize="Small" Grid.Column="1"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -44,12 +46,13 @@
 
                                 <Grid IsVisible="{Binding DoVisibleChart}" Grid.Row="1" Padding="10">
                                     <Label Text="Expense Chart" FontSize="24" HorizontalOptions="Center" />
-                                    <!--<views:BindableChartView Entries="{Binding ExpenseChartEntryWrappers}"
+                                    <views:BindableChartView Entries="{Binding ExpenseChartEntryWrappers}"
                                                                 HeightRequest="200"
-                                                                WidthRequest="300" />-->
+                                                                WidthRequest="300" />
                                 </Grid>
                             </Grid>
-                        </StackLayout>
+                        </ScrollView>
+                    </StackLayout>
                     </views:CardView>
 
                 </StackLayout>
