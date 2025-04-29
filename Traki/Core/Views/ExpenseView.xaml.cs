@@ -1,11 +1,23 @@
+using Core.ViewModels;
+
 namespace Core.Views;
 
 public partial class ExpenseView : ContentView
 {
-	public ExpenseView()
+    #region Private Variables
+    private ExpenseViewModel? _viewModel;
+    #endregion Private Variables
+
+    #region Constructor
+    public ExpenseView(ExpenseViewModel viewModel)
 	{
 		InitializeComponent();
+        this._viewModel = viewModel;
+        BindingContext = _viewModel;
 	}
+    #endregion Constructor
+
+    #region Events
     private void OnExpenseItemSelected(object sender, SelectionChangedEventArgs e)
     {
         //var selectedWrapper = e.CurrentSelection.FirstOrDefault() as ChartEntryWrapper;
@@ -21,4 +33,5 @@ public partial class ExpenseView : ContentView
         //    collectionViewIncome.SelectedItem = null;
         //}
     }
+    #endregion Events
 }

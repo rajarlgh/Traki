@@ -1,41 +1,31 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:Core.Views"
              xmlns:converters="clr-namespace:Core.Converters"
-             
              x:Class="Core.Views.IncomeView">
     <ContentView.Resources>
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:BooleanToTextConverter x:Key="BooleanToTextConverter" />
-            <converters:IncomeDisplayModeToChartVisibleConverter x:Key="IncomeDisplayModeToChartVisibleConverter" />
-
         </ResourceDictionary>
     </ContentView.Resources>
 
     <VerticalStackLayout>
-        <!-- Main Content -->
         <ScrollView Grid.Row="2" Padding="0,0,0,10">
-                <StackLayout Spacing="10">
+            <StackLayout Spacing="10">
 
-                    <!-- Income Section -->
-                <views:CardView Title="Income" >
+                <views:CardView Title="Income">
                     <VerticalStackLayout>
-
-                        <StackLayout >
-                            <Button Text="{Binding IsIncomeExpanded, Converter={StaticResource BooleanToTextConverter}}"
-                                    Command="{Binding ToggleIncomeCommand}" />
-
-                            <!-- 🛠️ Wrap the ScrollView inside a container controlled by IsIncomeExpanded -->
-                            <ContentView IsVisible="{Binding IsIncomeExpanded}"  MaximumHeightRequest="350">
-                                <ScrollView >
+                        <StackLayout>
+                            <Button Text="{Binding IsExpanded, Converter={StaticResource BooleanToTextConverter}}"
+                                    Command="{Binding ToggleFlagsCommand}" />
+                            <ContentView IsVisible="{Binding IsExpanded}" MaximumHeightRequest="350">
+                                <ScrollView>
                                     <Grid Padding="10">
                                         <CollectionView x:Name="collectionViewIncome"
-                                    ItemsSource="{Binding IncomeChartEntryWrappers}"
-                                    
-                                    SelectionMode="Single" 
-                                    SelectionChanged="OnIncomeItemSelected">
+                                                        ItemsSource="{Binding IncomeChartEntryWrappers}"
+                                                        SelectionMode="Single" 
+                                                        SelectionChanged="OnIncomeItemSelected">
                                             <CollectionView.ItemsLayout>
                                                 <GridItemsLayout Orientation="Vertical" Span="1" />
                                             </CollectionView.ItemsLayout>
@@ -59,8 +49,8 @@
                             <Grid>
                                 <Label Text="Income Chart" FontSize="24" HorizontalOptions="Center" />
                                 <views:BindableChartView Entries="{Binding IncomeChartEntryWrappers}"
-                                     HeightRequest="350"
-                                     WidthRequest="300" />
+                                                         HeightRequest="350"
+                                                         WidthRequest="300" />
                             </Grid>
                         </StackLayout>
                     </VerticalStackLayout>

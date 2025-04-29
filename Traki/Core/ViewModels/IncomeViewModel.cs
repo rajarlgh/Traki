@@ -12,7 +12,7 @@ using TrakiLibrary.Models;
 
 namespace Core.ViewModels
 {
-    public partial class IncomeViewModel : ObservableObject, IRecipient<FilterChangedMessage>
+    public partial class IncomeViewModel : TransactionBase, IRecipient<FilterChangedMessage>
     {
         #region Private Variables
         private readonly ITransactionService? _transactionService;
@@ -22,13 +22,8 @@ namespace Core.ViewModels
 
 #pragma warning disable
         [ObservableProperty]
-        private bool isIncomeExpanded = false;
-        [ObservableProperty]
         private ObservableCollection<ChartEntryWrapper> incomeChartEntryWrappers;
-        [ObservableProperty]
-        private bool doVisibleChart = false;
-        [ObservableProperty]
-        private bool showChartVisible;
+
         [ObservableProperty]
         private IncomeDisplayMode incomeDisplayMode = IncomeDisplayMode.Chart;
 #pragma warning restore
@@ -54,7 +49,7 @@ namespace Core.ViewModels
             // Use filter.SelectedFilterOption, etc. to update IncomeChartEntryWrappers
             UpdateIncomeChart(filter);
         }
-        private void PublishAccountChanged(AccountDetails accountDetails)
+        private void PublishAccountChanged(TransactionFilterRequest accountDetails)
         {
             StrongReferenceMessenger.Default.Send(new AccountChangedMessage((accountDetails)));
         }
@@ -149,7 +144,16 @@ namespace Core.ViewModels
             {
                 return;
             }
-            var accountDetails = new AccountDetails() { Transactions = transactions };
+            var categories = await _categoryService.GetCategoriesAsync();
+            var accountDetails = new TransactionFilterRequest() 
+            { 
+                Transactions = transactions, 
+                FilterOption=filterOption,
+                AccountId=accountId,
+                FromDate=fromDate,
+                ToDate=toDate,
+                Categories = categories
+            };
             this.PublishAccountChanged(accountDetails);
             var filteredTransactions = new List<Transaction>();
 
@@ -171,7 +175,7 @@ namespace Core.ViewModels
             else
             { filteredTransactions = transactions; }
 
-            var categories = await _categoryService.GetCategoriesAsync();
+            
             var incomeGroupedData = filteredTransactions
                 .Where( t => t.Type == "Income" && t.CategoryId != null)
                 .GroupBy(t => t.CategoryId)
@@ -190,13 +194,14 @@ namespace Core.ViewModels
                 .ToList();
 
             var t = incomeGroupedData.Count();
+            var chartColor = new Chart();
             var incomeData = incomeGroupedData.Select(data => new ChartEntryWrapper
             {
 
                 Label = data.CategoryName,
                 ValueLabel = data.TotalAmount.ToString("F0"),
                 Value = (float)data.TotalAmount, // 👈 SET THIS
-                Color = GetCategoryColor(data.CategoryName ?? string.Empty),
+                Color = chartColor.GetCategoryColor(data.CategoryName ?? string.Empty),
                 CategoryId = data.CategoryId,
             }).ToList();
 
@@ -216,56 +221,25 @@ namespace Core.ViewModels
             //this.LoadTransactionsAndSetGrid(Transactions);
 
         }
-        private readonly Dictionary<string, SKColor> _categoryColors = new();
-        private readonly List<SKColor> _availableColors = new()
-        {
-            SKColor.Parse("#00FF00"), // Green
-            SKColor.Parse("#FF5733"), // Orange
-            SKColor.Parse("#3498DB"), // Blue
-            SKColor.Parse("#9B59B6"), // Purple
-            SKColor.Parse("#1ABC9C"), // Teal
-            SKColor.Parse("#F1C40F"), // Yellow
-            SKColor.Parse("#E74C3C"), // Red
-            SKColor.Parse("#34495E"), // Dark Gray
-            SKColor.Parse("#2ECC71"), // Light Green
-            SKColor.Parse("#E67E22"), // Light Orange
-            SKColor.Parse("#16A085"), // Dark Teal
-            SKColor.Parse("#8E44AD"), // Deep Purple
-            SKColor.Parse("#BDC3C7")  // Light Gray
-        };
-        private int _colorIndex = 0;
-        private SKColor GetCategoryColor(string category)
-        {
-            if (!_categoryColors.ContainsKey(category))
-            {
-                // Assign the next available color
-                var color = _availableColors[_colorIndex];
-                _categoryColors[category] = color;
-
-                // Update the color index, wrap around if necessary
-                _colorIndex = (_colorIndex + 1) % _availableColors.Count;
-            }
-
-            return _categoryColors[category];
-        }
+       
 
         #endregion Private Methods
 
         #region Commands
-        [RelayCommand]
-        private void ToggleIncome()
-        {
-            IsIncomeExpanded = !IsIncomeExpanded;
-            this.ToggleIncomeDisplayMode();
-        }
-        [RelayCommand]
-        private void ToggleIncomeDisplayMode()
-        {
-            IncomeDisplayMode = IncomeDisplayMode == IncomeDisplayMode.Chart
-                ? IncomeDisplayMode.List
-                : IncomeDisplayMode.Chart;
-            this.ShowChartVisible = IncomeDisplayMode == IncomeDisplayMode.Chart;
-        }
+        //[RelayCommand]
+        //private void ToggleIncome()
+        //{
+        //    IsIncomeExpanded = !IsIncomeExpanded;
+        //    this.ToggleIncomeDisplayMode();
+        //}
+        //[RelayCommand]
+        //private void ToggleIncomeDisplayMode()
+        //{
+        //    IncomeDisplayMode = IncomeDisplayMode == IncomeDisplayMode.Chart
+        //        ? IncomeDisplayMode.List
+        //        : IncomeDisplayMode.Chart;
+        //    this.ShowChartVisible = IncomeDisplayMode == IncomeDisplayMode.Chart;
+        //}
         #endregion 
     }
 }

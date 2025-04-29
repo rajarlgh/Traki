@@ -2,8 +2,8 @@
 
 namespace Core.Shared
 {
-    public class AccountChangedMessage : ValueChangedMessage<AccountDetails>
+    public class AccountChangedMessage : ValueChangedMessage<TransactionFilterRequest>
     {
-        public AccountChangedMessage(AccountDetails value) : base(value) { }
+        public AccountChangedMessage(TransactionFilterRequest value) : base(value) { }
     }
 }

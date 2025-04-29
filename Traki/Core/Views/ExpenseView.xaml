@@ -11,51 +11,58 @@
             <converters:BooleanToTextConverter x:Key="BooleanToTextConverter" />
         </ResourceDictionary>
     </ContentView.Resources>
-    
+
     <VerticalStackLayout>
         <!-- Main Content -->
         <ScrollView Grid.Row="2" Padding="0,0,0,10">
-                <StackLayout Spacing="10">
+            <StackLayout Spacing="10">
 
-                    <!-- Expenses Section -->
-                    <views:CardView Title="Expenses">
+                <!-- Expenses Section -->
+                <views:CardView Title="Expenses">
+                    <VerticalStackLayout>
                         <StackLayout>
-                            <Button Text="{Binding IsExpensesExpanded, Converter={StaticResource BooleanToTextConverter}}"
-                                    Command="{Binding ToggleExpensesCommand}" />
-                        <ScrollView  HeightRequest="200" >
-                            <Grid RowDefinitions="*, *" Padding="10" IsVisible="{Binding IsExpensesExpanded}">
-                                <CollectionView x:Name="collectionViewExpense"
-                                            ItemsSource="{Binding ExpenseChartEntryWrappers}"
-                                            IsVisible="{Binding DoVisibleChart, Converter={StaticResource InverseBooleanConverter}}"
-                                            SelectionMode="Single"
-                                            SelectionChanged="OnExpenseItemSelected">
-                                    <CollectionView.ItemsLayout>
-                                        <GridItemsLayout Orientation="Vertical" Span="1" />
-                                    </CollectionView.ItemsLayout>
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Padding="10" Margin="5" BackgroundColor="Transparent">
-                                                <Grid ColumnDefinitions="*,*">
-                                                    <Label Text="{Binding Label}" FontAttributes="Bold" Grid.Column="0" />
-                                                    <Label Text="{Binding ValueLabel}" FontSize="Small" Grid.Column="1"/>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
+                            <Button Text="{Binding IsExpanded, Converter={StaticResource BooleanToTextConverter}}"
+                                        Command="{Binding ToggleFlagsCommand}" />
+                            <!-- 🛠️ Wrap the ScrollView inside a container controlled by IsIncomeExpanded -->
+                            <ContentView IsVisible="{Binding IsExpanded}"  MaximumHeightRequest="350">
+                                <ScrollView>
+                                    <Grid Padding="10">
+                                        <CollectionView x:Name="collectionViewExpense"
+                                                ItemsSource="{Binding ExpenseChartEntryWrappers}"
+                                                SelectionMode="Single"
+                                                SelectionChanged="OnExpenseItemSelected">
+                                            <CollectionView.ItemsLayout>
+                                                <GridItemsLayout Orientation="Vertical" Span="1" />
+                                            </CollectionView.ItemsLayout>
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Padding="10" Margin="5" BackgroundColor="Transparent">
+                                                        <Grid ColumnDefinitions="*,*">
+                                                            <Label Text="{Binding Label}" FontAttributes="Bold" Grid.Column="0" />
+                                                            <Label Text="{Binding ValueLabel}" FontSize="Small" Grid.Column="1"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
 
-                                <Grid IsVisible="{Binding DoVisibleChart}" Grid.Row="1" Padding="10">
-                                    <Label Text="Expense Chart" FontSize="24" HorizontalOptions="Center" />
-                                    <views:BindableChartView Entries="{Binding ExpenseChartEntryWrappers}"
-                                                                HeightRequest="200"
-                                                                WidthRequest="300" />
-                                </Grid>
+
+                                    </Grid>
+                                </ScrollView>
+                            </ContentView>
+                        </StackLayout>
+                        <StackLayout HeightRequest="350" IsVisible="{Binding ShowChartVisible}">
+                            <Grid>
+                                <Label Text="Expense Chart" FontSize="24" HorizontalOptions="Center" />
+                                <views:BindableChartView Entries="{Binding ExpenseChartEntryWrappers}"
+                                                                        HeightRequest="350"
+                                                                        WidthRequest="300" />
                             </Grid>
-                        </ScrollView>
-                    </StackLayout>
-                    </views:CardView>
+                        </StackLayout>
+                    </VerticalStackLayout>
+                </views:CardView>
 
-                </StackLayout>
+            </StackLayout>
         </ScrollView>
     </VerticalStackLayout>
 </ContentView>

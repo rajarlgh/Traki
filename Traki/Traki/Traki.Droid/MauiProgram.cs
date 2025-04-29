@@ -34,6 +34,8 @@ namespace Traki.Droid
             RegisterPageWithViewModel<ManageAccountsViewModel, ManageAccountsPage>(builder);
             RegisterPageWithViewModel<ExcelUploaderViewModel, ExcelUploaderPage>(builder);
             RegisterPageWithViewModel<IncomeViewModel, IncomeView>(builder);
+            RegisterPageWithViewModel<ExpenseViewModel, ExpenseView>(builder);
+
             builder.Services.AddSingleton<DashboardViewModel>(provider =>
             {
                 var service = provider.GetRequiredService<IAccountService>();

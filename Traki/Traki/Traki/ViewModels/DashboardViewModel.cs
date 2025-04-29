@@ -16,13 +16,12 @@ namespace Traki.ViewModels
         private readonly IServiceProvider _serviceProvider;
         
 #pragma warning disable
-
         [ObservableProperty]
         private View? selectedTabView;
         [ObservableProperty]
         public decimal balance;
 #pragma warning restore
-
+        ExpenseView expenseView;
         #endregion Private Variables
 
         #region Constructor
@@ -51,12 +50,16 @@ namespace Traki.ViewModels
         {
             var viewModel = _serviceProvider.GetRequiredService<IncomeViewModel>();
             SelectedTabView = new IncomeView(viewModel);
+
+            // Initialize the expense view model.
+            var expenseViewModel = _serviceProvider.GetRequiredService<ExpenseViewModel>();
+            expenseView = new ExpenseView(expenseViewModel);
         }
 
         [RelayCommand]
         private void ShowExpense()
         {
-            SelectedTabView = new ExpenseView();
+            SelectedTabView = expenseView;
         }
 
         [RelayCommand]
@@ -79,7 +82,7 @@ namespace Traki.ViewModels
         #endregion Commands
 
         #region Private Methods
-        private void CalculateBalances(AccountDetails accountDetails)
+        private void CalculateBalances(TransactionFilterRequest accountDetails)
         {
             var _transactions = accountDetails.Transactions;
             if (_transactions != null)

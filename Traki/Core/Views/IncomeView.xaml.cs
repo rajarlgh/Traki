@@ -4,13 +4,21 @@ namespace Core.Views;
 
 public partial class IncomeView : ContentView
 {
+    #region Private Variables
     private IncomeViewModel? _viewModel;
+    #endregion Private Variables
+
+    #region Constructor
     public IncomeView(IncomeViewModel viewModel)
 	{
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = _viewModel;
     }
+    #endregion Constructor
+
+    #region Events
+
     private void OnIncomeItemSelected(object sender, SelectionChangedEventArgs e)
     {
         // Deselect the previously selected item in CollectionView2
@@ -29,19 +37,6 @@ public partial class IncomeView : ContentView
         //    collectionViewExpense.SelectedItems = null;
         //}
     }
-    private void OnExpenseItemSelected(object sender, SelectionChangedEventArgs e)
-    {
-        //var selectedWrapper = e.CurrentSelection.FirstOrDefault() as ChartEntryWrapper;
-        //if (selectedWrapper != null)
-        //{
-        //    // Use the ID and Name from the wrapper
-        //    this.SelectedCategory.Id = selectedWrapper.CategoryId;
-        //    this.SelectedCategory.Name = selectedWrapper.Entry.Label;
+    #endregion Events
 
-        //    this.CategoryType = "Expense";
-        //    var viewModel = BindingContext as TransactionHistoryViewModel;
-        //    viewModel?.ShowBreakdownForCategory(this.SelectedCategory, this.CategoryType);
-        //    collectionViewIncome.SelectedItem = null;
-        //}
-    }
 }
