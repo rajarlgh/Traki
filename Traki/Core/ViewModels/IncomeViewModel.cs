@@ -29,14 +29,12 @@ namespace Core.ViewModels
 #pragma warning restore
 
         #region Public Constructor
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public IncomeViewModel(ITransactionService? transactionService, ICategoryService? categoryService)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         {
             _transactionService = transactionService;
             _categoryService = categoryService;
-            //WeakReferenceMessenger.Default.Register<IncomeViewModel, FilterChangedMessage>(this, 
-            //    (r, m) => r.Receive(m));
-
-            //StrongReferenceMessenger.Default.Register<IncomeViewModel, FilterChangedMessage>(this, (r, m) => r.Receive(m));
             StrongReferenceMessenger.Default.Register(this);
 
         }
@@ -79,9 +77,22 @@ namespace Core.ViewModels
             }
             else if (option == FilterOption.Week)
             {
-                var yr = filter.SelectedYear.Value;
+                int y = 0;
+                string w = string.Empty;
+                if (filter != null)
+                {
+                    if (filter.SelectedYear != null)
+                    {
+                        y = filter.SelectedYear.Value;
+                    }
+                    if (filter.SelectedWeek != null)
+                    {
+                        w = filter.SelectedWeek;
+                    }
+                }
+                var yr = y;
 
-                var selectedWeek = filter.SelectedWeek;
+                var selectedWeek = w;
 
                 if (string.IsNullOrWhiteSpace(selectedWeek) || yr == 0)
                     return;
@@ -104,21 +115,34 @@ namespace Core.ViewModels
             }
             else if (option == FilterOption.Month)
             {
-                var mon = filter.SelectedMonth;
-                var yr = filter.SelectedYear;
+                if (filter != null)
+                {
+                    var mon = filter.SelectedMonth;
+                    int yer = 0;
+                    if (filter.SelectedYear != null)
+                    {
+                        yer = filter.SelectedYear.Value;
+                    }
+                    var yr = yer;
 
-                if (string.IsNullOrWhiteSpace(mon) || yr == 0)
-                    return;
+                    if (string.IsNullOrWhiteSpace(mon) || yr == 0)
+                        return;
 
-                int m = DateTime.ParseExact(mon, "MMMM", CultureInfo.CurrentCulture).Month;
-                int y = yr.Value;
+                    int m = DateTime.ParseExact(mon, "MMMM", CultureInfo.CurrentCulture).Month;
+                    int y = yr;
 
-                fromDate = new DateTime(y, m, 1);
-                toDate = fromDate.AddMonths(1).AddDays(-1);
+                    fromDate = new DateTime(y, m, 1);
+                    toDate = fromDate.AddMonths(1).AddDays(-1);
+                }
             }
             else if (option == FilterOption.Year)
             {
-                var yr = filter.SelectedYear.Value;
+                int y = 0;
+                if (filter != null && filter.SelectedYear != null)
+                {
+                    y = filter.SelectedYear.Value;
+                }
+                var yr = y;
                 fromDate = new DateTime(yr, 1, 1);
                 toDate = new DateTime(yr, 12, 31);
             }
@@ -133,17 +157,30 @@ namespace Core.ViewModels
                 toDate = filter.ToDate;
             }
 
-            FilterTransactionsByRange(fromDate, toDate, filter.SelectedAccount.Id, option);
+            int accountId = 0;
+            if (filter != null && filter.SelectedAccount != null)
+            {
+                accountId = filter.SelectedAccount.Id;
+            }
+
+            FilterTransactionsByRange(fromDate, toDate, accountId, option);
         }
 
         private async void FilterTransactionsByRange(DateTime fromDate, DateTime toDate, int accountId, FilterOption? filterOption)
         {
 
+            if (_transactionService == null)
+                throw new InvalidOperationException("Transaction service is not initialized.");
+
             var transactions = await _transactionService.GetTransactionsAsync();
+
             if (transactions == null)
             {
                 return;
             }
+            if (_categoryService == null)
+                throw new InvalidOperationException("Category service is not initialized.");
+
             var categories = await _categoryService.GetCategoriesAsync();
             var accountDetails = new TransactionFilterRequest() 
             { 
@@ -155,91 +192,68 @@ namespace Core.ViewModels
                 Categories = categories
             };
             this.PublishAccountChanged(accountDetails);
-            var filteredTransactions = new List<Transaction>();
+            var chart = new Chart();
+            var data = chart.CreateChart(accountDetails, TransactionType.Income);
+            IncomeChartEntryWrappers = new ObservableCollection<ChartEntryWrapper>(data);
 
-            if (filterOption != FilterOption.All)
-            {
-                if (accountId > 0)
-                {
-                    filteredTransactions = transactions
-                        .Where(t => t.Date >= fromDate && t.Date <= toDate && t.AccountId == accountId)
-                        .ToList();
-                }
-                else
-                {
-                    filteredTransactions = transactions
-                        .Where(t => t.Date >= fromDate && t.Date <= toDate)
-                        .ToList();
-                }
-            }
-            else
-            { filteredTransactions = transactions; }
+            //var filteredTransactions = new List<Transaction>();
 
-            
-            var incomeGroupedData = filteredTransactions
-                .Where( t => t.Type == "Income" && t.CategoryId != null)
-                .GroupBy(t => t.CategoryId)
-                .Select(g =>
-                {
-                    var categoryId = g.Key;
-                    var categoryName = categories.FirstOrDefault(c => c.Id == categoryId)?.Name;
+            //if (filterOption != FilterOption.All)
+            //{
+            //    if (accountId > 0)
+            //    {
+            //        filteredTransactions = transactions
+            //            .Where(t => t.Date >= fromDate && t.Date <= toDate && t.AccountId == accountId)
+            //            .ToList();
+            //    }
+            //    else
+            //    {
+            //        filteredTransactions = transactions
+            //            .Where(t => t.Date >= fromDate && t.Date <= toDate)
+            //            .ToList();
+            //    }
+            //}
+            //else
+            //{ filteredTransactions = transactions; }
 
-                    return new
-                    {
-                        CategoryId = categoryId,
-                        CategoryName = categoryName,
-                        TotalAmount = g.Sum(t => t.Amount)
-                    };
-                })
-                .ToList();
 
-            var t = incomeGroupedData.Count();
-            var chartColor = new Chart();
-            var incomeData = incomeGroupedData.Select(data => new ChartEntryWrapper
-            {
+            //var incomeGroupedData = filteredTransactions
+            //    .Where( t => t.Type == "Income" && t.CategoryId != null)
+            //    .GroupBy(t => t.CategoryId)
+            //    .Select(g =>
+            //    {
+            //        var categoryId = g.Key;
+            //        var categoryName = categories.FirstOrDefault(c => c.Id == categoryId)?.Name;
 
-                Label = data.CategoryName,
-                ValueLabel = data.TotalAmount.ToString("F0"),
-                Value = (float)data.TotalAmount, // 👈 SET THIS
-                Color = chartColor.GetCategoryColor(data.CategoryName ?? string.Empty),
-                CategoryId = data.CategoryId,
-            }).ToList();
+            //        return new
+            //        {
+            //            CategoryId = categoryId,
+            //            CategoryName = categoryName,
+            //            TotalAmount = g.Sum(t => t.Amount)
+            //        };
+            //    })
+            //    .ToList();
 
-            // Set collection of ChartEntryWrapper for CollectionView
-            IncomeChartEntryWrappers = new ObservableCollection<ChartEntryWrapper>(incomeData);
+            //var t = incomeGroupedData.Count();
+            //var chartColor = new Chart();
+            //var incomeData = incomeGroupedData.Select(data => new ChartEntryWrapper
+            //{
 
-            //if (incomeData.Count > 0)
-            //    doVisibleChart = !this.doVisibleChart;
+            //    Label = data.CategoryName,
+            //    ValueLabel = data.TotalAmount.ToString("F0"),
+            //    Value = (float)data.TotalAmount, // 👈 SET THIS
+            //    Color = chartColor.GetCategoryColor(data.CategoryName ?? string.Empty),
+            //    CategoryId = data.CategoryId,
+            //}).ToList();
 
-            // Recreate charts
-            //IncomeChart = CreateChart(IncomeChartEntryWrappers);
-            //// Execute the query and update the Transactions list
-            //Transactions = new ObservableCollection<Transaction>(data);
-
-            //CalculateBalances();
-            //OnPropertyChanged(nameof(Transactions));
-            //this.LoadTransactionsAndSetGrid(Transactions);
+            //// Set collection of ChartEntryWrapper for CollectionView
+            //IncomeChartEntryWrappers = new ObservableCollection<ChartEntryWrapper>(incomeData);
 
         }
-       
+
 
         #endregion Private Methods
 
-        #region Commands
-        //[RelayCommand]
-        //private void ToggleIncome()
-        //{
-        //    IsIncomeExpanded = !IsIncomeExpanded;
-        //    this.ToggleIncomeDisplayMode();
-        //}
-        //[RelayCommand]
-        //private void ToggleIncomeDisplayMode()
-        //{
-        //    IncomeDisplayMode = IncomeDisplayMode == IncomeDisplayMode.Chart
-        //        ? IncomeDisplayMode.List
-        //        : IncomeDisplayMode.Chart;
-        //    this.ShowChartVisible = IncomeDisplayMode == IncomeDisplayMode.Chart;
-        //}
-        #endregion 
+ 
     }
 }

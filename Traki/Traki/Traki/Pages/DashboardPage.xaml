@@ -64,5 +64,35 @@
         <!-- Tab Content Area -->
         <ContentView Content="{Binding SelectedTabView}" />
 
+        <!--Tab Buttons-->
+        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" >
+            <Grid ColumnDefinitions="Auto, *, Auto"  Padding="20,0,20,0" ColumnSpacing="20">
+                <Button Text="Deposit"
+                     Grid.Column="0" 
+                    Command="{Binding onAddMoneyClickedCommand}"
+                    WidthRequest="100"
+                    HeightRequest="30"
+                    CornerRadius="50"
+                    BorderColor="Green"
+                    BorderWidth="7"
+                    BackgroundColor="Transparent"
+                    TextColor="Green"
+                    FontSize="15" />
+
+
+                <Button Text="Widthdraw"
+                      Grid.Column="2" 
+                     Command="{Binding onWidthDrawMoneyClickedCommand}"
+                     WidthRequest="100"
+                     HeightRequest="30"
+                     CornerRadius="50"
+                     BorderColor="Red"
+                     BorderWidth="7"
+                     BackgroundColor="Transparent"
+                     TextColor="Red"
+                     FontSize="15" />
+            </Grid>
+        </HorizontalStackLayout>
+        
     </VerticalStackLayout>
 </ContentPage>

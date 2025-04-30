@@ -24,7 +24,7 @@
                             <Button Text="{Binding IsExpanded, Converter={StaticResource BooleanToTextConverter}}"
                                         Command="{Binding ToggleFlagsCommand}" />
                             <!-- 🛠️ Wrap the ScrollView inside a container controlled by IsIncomeExpanded -->
-                            <ContentView IsVisible="{Binding IsExpanded}"  MaximumHeightRequest="350">
+                            <ContentView IsVisible="{Binding IsExpanded}"  MaximumHeightRequest="330">
                                 <ScrollView>
                                     <Grid Padding="10">
                                         <CollectionView x:Name="collectionViewExpense"
@@ -51,11 +51,11 @@
                                 </ScrollView>
                             </ContentView>
                         </StackLayout>
-                        <StackLayout HeightRequest="350" IsVisible="{Binding ShowChartVisible}">
+                        <StackLayout HeightRequest="330" IsVisible="{Binding ShowChartVisible}">
                             <Grid>
                                 <Label Text="Expense Chart" FontSize="24" HorizontalOptions="Center" />
                                 <views:BindableChartView Entries="{Binding ExpenseChartEntryWrappers}"
-                                                                        HeightRequest="350"
+                                                                        HeightRequest="330"
                                                                         WidthRequest="300" />
                             </Grid>
                         </StackLayout>
