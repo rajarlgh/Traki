@@ -1,22 +1,26 @@
 using Core.Enum;
 using Core.ViewModels;
+using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
 
 namespace Core.Pages;
 
+[QueryProperty(nameof(Transaction), "Transaction")]
 [QueryProperty(nameof(TypeString), "type")]
 public partial class TransactionPage : ContentPage
 {
     #region Private Variables
     private TransactionViewModel? _transactionViewModel;
     private Transaction? _transaction;
+    private ICategoryService? _categoryService;
     #endregion Private Variables
     #region Constructor
-    public TransactionPage(TransactionViewModel? transactionViewModel)
+    public TransactionPage(TransactionViewModel? transactionViewModel, ICategoryService categoryService)
     {
 		InitializeComponent();
         _transactionViewModel = transactionViewModel;
         BindingContext = transactionViewModel;
+        this._categoryService = categoryService;
 	}
     #endregion Constructor
 
@@ -65,6 +69,18 @@ public partial class TransactionPage : ContentPage
             {
                 // Load categories and set the selected category
                 await transactionViewModel.LoadCategoriesAsync(Transaction.Category ?? new Category());
+                await transactionViewModel.LoadCategoriesAsync(Transaction.Category ?? new Category());
+
+                if (_categoryService != null && this.Transaction.CategoryId != null)
+                {
+                    var category = await _categoryService.GetCategoryByIdAsync(this.Transaction.CategoryId.Value);
+                    var matchedCategory = transactionViewModel.ListOfCategories
+                        .FirstOrDefault(c => c.Id == category.Id);
+
+                    transactionViewModel.SelectedCategory = matchedCategory;
+                }
+
+
 
                 // Load categories and set the selected category
                 await transactionViewModel.LoadAccountsAsync(Transaction.Id);
@@ -73,6 +89,12 @@ public partial class TransactionPage : ContentPage
                 transactionViewModel.TransactionText = "Edit Transaction";
                 transactionViewModel.Id = Transaction.Id;
                 transactionViewModel.SelectedType = Type;
+
+                //if (_categoryService != null && this.Transaction.CategoryId != null)
+                //{
+                //    var category = await _categoryService.GetCategoryByIdAsync(this.Transaction.CategoryId.Value);
+                //    transactionViewModel.SelectedCategory = category;
+                //}
                 transactionViewModel.Amount = Transaction.Amount;
                 transactionViewModel.Reason = Transaction.Reason ?? string.Empty;   
                 transactionViewModel.Date = Transaction.Date;

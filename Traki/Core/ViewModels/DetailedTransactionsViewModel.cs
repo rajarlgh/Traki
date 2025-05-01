@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Core.Enum;
+using Core.Pages;
 using System.Collections.ObjectModel;
 using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
@@ -53,6 +55,16 @@ namespace Core.ViewModels
         }
         #endregion Public Methods
 
-
+        #region Commands
+        [RelayCommand]
+        public async Task EditTransactionDetailsAsync(Transaction transaction)
+        {
+            // Pass the TransactionViewModel to the transaction page
+            await Shell.Current.GoToAsync($"{nameof(TransactionPage)}?type={transaction.Type}", true, new Dictionary<string, object>
+            {
+                { "Transaction", transaction }
+            });
+        }
+        #endregion Commands
     }
 }
