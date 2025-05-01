@@ -34,6 +34,7 @@ namespace Traki.Droid
             RegisterPageWithViewModel<ManageAccountsViewModel, ManageAccountsPage>(builder);
             RegisterPageWithViewModel<ExcelUploaderViewModel, ExcelUploaderPage>(builder);
             RegisterPageWithViewModel<TransactionViewModel, TransactionPage>(builder);
+            RegisterPageWithViewModel<DetailedTransactionsViewModel, DetailedTransactionsView>(builder);
             RegisterPageWithViewModel<IncomeViewModel, IncomeView>(builder);
             RegisterPageWithViewModel<ExpenseViewModel, ExpenseView>(builder);
 

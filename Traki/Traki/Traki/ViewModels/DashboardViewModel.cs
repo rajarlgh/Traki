@@ -7,11 +7,10 @@ using Core.Shared.Messages.Transactions;
 using Core.ViewModels;
 using Core.Views;
 using TrakiLibrary.Interfaces;
-using TrakiLibrary.Models;
 
 namespace Traki.ViewModels
 {
-    public partial class DashboardViewModel : ObservableObject, IRecipient<AccountChangedMessage>   
+    public partial class DashboardViewModel : ObservableObject, IRecipient<AccountChangedMessage>
     {
         #region Private Variables
         private readonly IServiceProvider _serviceProvider;
@@ -34,9 +33,13 @@ namespace Traki.ViewModels
             //StrongReferenceMessenger.Default.Register(this);
             StrongReferenceMessenger.Default.Register <AccountChangedMessage>(this);
 
-            WeakReferenceMessenger.Default.Register<ShowTransactionsTabMessage>(this, (r, m) =>
+            WeakReferenceMessenger.Default.Register<SelectedTransactionMessage>(this, (r, m) =>
             {
-                ShowTransactions();
+                var selectedItem = m.Value;
+                if (selectedItem != null)
+                {
+                    ShowTransactions(selectedItem);
+                }
             });
 
         }
@@ -70,9 +73,14 @@ namespace Traki.ViewModels
         }
 
         [RelayCommand]
-        private void ShowTransactions()
+        private void ShowTransactions(TransactionMessage transactionMessage)
         {
-            SelectedTabView = new TransactionView();
+            var viewModel = _serviceProvider.GetService<DetailedTransactionsViewModel>();
+            if (viewModel != null)
+            {
+                viewModel.ShowBreakdownForCategory(transactionMessage.CategoryId, transactionMessage.TransactionType);
+                SelectedTabView = new DetailedTransactionsView(viewModel);
+            }
         }
 
         [RelayCommand]

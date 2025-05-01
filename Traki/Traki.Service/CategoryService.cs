@@ -6,43 +6,29 @@ namespace Traki.Service
 {
     public class CategoryService : ICategoryService
     {
+        #region Private Variables
         private readonly SQLiteAsyncConnection _database;
+        private bool _isInitialized = false;
+        private readonly SemaphoreSlim _initLock = new(1, 1); // Thread-safe initialization
+        #endregion Private Variables
+
+        #region public Methods
         public async Task InitializeAsync()
         {
             await _database.CreateTableAsync<Category>();
         }
-
-        public CategoryService(string dbPath)
-        {
-            _database = new SQLiteAsyncConnection(dbPath);
-        }
-
         public async Task<List<Category>> GetCategoriesAsync()
         {
             await EnsureInitializedAsync();
             return await _database.Table<Category>().ToListAsync();
         }
-        private bool _isInitialized = false;
-        private readonly SemaphoreSlim _initLock = new(1, 1); // Thread-safe initialization
-        private async Task EnsureInitializedAsync()
+
+        public async Task<Category?> GetCategoryByIdAsync(int id)
         {
-            if (_isInitialized) return;
-
-            await _initLock.WaitAsync();
-            try
-            {
-                if (!_isInitialized)
-                {
-                    await _database.CreateTableAsync<Category>();
-                    _isInitialized = true;
-                }
-            }
-            finally
-            {
-                _initLock.Release();
-            }
+            await EnsureInitializedAsync();
+            return await _database.Table<Category>()
+                                  .FirstOrDefaultAsync(c => c.Id == id);
         }
-
         public async Task<Category> AddCategoryAsync(Category category)
         {
             await EnsureInitializedAsync(); // Critical to prevent hanging
@@ -77,5 +63,38 @@ namespace Traki.Service
             await _database.UpdateAsync(category);
         }
 
+        #endregion public Methods
+
+        #region Constructors
+        public CategoryService(string dbPath)
+        {
+            _database = new SQLiteAsyncConnection(dbPath);
+        }
+        #endregion Constructors
+
+
+
+        #region Private Methods
+        private async Task EnsureInitializedAsync()
+        {
+            if (_isInitialized) return;
+
+            await _initLock.WaitAsync();
+            try
+            {
+                if (!_isInitialized)
+                {
+                    await _database.CreateTableAsync<Category>();
+                    _isInitialized = true;
+                }
+            }
+            finally
+            {
+                _initLock.Release();
+            }
+        }
+        #endregion Private Methods
+
+        
     }
 }

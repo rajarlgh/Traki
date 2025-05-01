@@ -40,6 +40,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\DetailedTransactionsView.xaml.cs">
+      <DependentUpon>DetailedTransactionsView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <MauiXaml Update="Pages\ExcelUploaderPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -64,7 +70,7 @@
     <MauiXaml Update="Views\SharedHeaderView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\TransactionView.xaml">
+    <MauiXaml Update="Views\DetailedTransactionsView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>
