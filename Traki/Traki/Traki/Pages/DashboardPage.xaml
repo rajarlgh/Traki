@@ -58,7 +58,7 @@
         <HorizontalStackLayout Padding="10" Spacing="10" HorizontalOptions="Center">
             <Button Text="Income" Command="{Binding ShowIncomeCommand}" />
             <Button Text="Expense" Command="{Binding ShowExpenseCommand}" />
-            <Button Text="Transactions" Command="{Binding ShowTransactionsCommand}" />
+            <!--<Button Text="Transactions" Command="{Binding ShowTransactionsCommand}" />-->
         </HorizontalStackLayout>
 
         <!-- Tab Content Area -->

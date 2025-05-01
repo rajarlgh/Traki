@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.Messaging;
+using Core.Shared;
 using Core.ViewModels;
 
 namespace Core.Views;
@@ -21,6 +23,15 @@ public partial class IncomeView : ContentView
 
     private void OnIncomeItemSelected(object sender, SelectionChangedEventArgs e)
     {
+        var selectedItem = e.CurrentSelection.FirstOrDefault();
+        if (selectedItem != null)
+        {
+            // Send a message to switch to the Transactions tab
+            WeakReferenceMessenger.Default.Send(new ShowTransactionsTabMessage());
+
+            // Optional: Clear selection
+            collectionViewIncome.SelectedItem = null;
+        }
         // Deselect the previously selected item in CollectionView2
         //var selectedWrapper = e.CurrentSelection.FirstOrDefault() as ChartEntryWrapper;
         //if (selectedWrapper != null)

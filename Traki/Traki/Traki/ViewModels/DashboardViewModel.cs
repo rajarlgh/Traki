@@ -32,6 +32,12 @@ namespace Traki.ViewModels
             ShowIncome();
             //StrongReferenceMessenger.Default.Register(this);
             StrongReferenceMessenger.Default.Register <AccountChangedMessage>(this);
+
+            WeakReferenceMessenger.Default.Register<ShowTransactionsTabMessage>(this, (r, m) =>
+            {
+                ShowTransactions();
+            });
+
         }
         #endregion Constructor
 
