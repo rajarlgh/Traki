@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Core.Pages;
 using Core.Shared;
+using Core.Shared.Messages.Transactions;
 using Core.ViewModels;
 using Core.Views;
 using TrakiLibrary.Interfaces;
