@@ -10,6 +10,7 @@ namespace Traki
             InitializeComponent();
             Routing.RegisterRoute(nameof(ManageAccountsPage), typeof(ManageAccountsPage));
             Routing.RegisterRoute(nameof(ExcelUploaderPage), typeof(ExcelUploaderPage));
+            Routing.RegisterRoute(nameof(TransactionPage), typeof(TransactionPage));
         }
     }
 }

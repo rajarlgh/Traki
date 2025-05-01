@@ -6,8 +6,8 @@
     <VerticalStackLayout>
         <Picker Title="Type"
         ItemsSource="{Binding TransactionTypes}"
-        SelectedItem="{Binding Type}" 
-        IsEnabled="False"/>
+        SelectedItem="{Binding SelectedType}" 
+        IsEnabled="True"/>
 
         <!-- Category Picker -->
         <!--IsVisible="{Binding IsCategoryVisible}"-->

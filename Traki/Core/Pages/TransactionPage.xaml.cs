@@ -1,35 +1,56 @@
+using Core.Enum;
 using Core.ViewModels;
 using TrakiLibrary.Models;
 
 namespace Core.Pages;
 
+[QueryProperty(nameof(TypeString), "type")]
 public partial class TransactionPage : ContentPage
 {
     #region Private Variables
-    private TransactionViewModel _transactionViewModel;
-    private Transaction _transaction;
+    private TransactionViewModel? _transactionViewModel;
+    private Transaction? _transaction;
     #endregion Private Variables
     #region Constructor
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public TransactionPage(TransactionViewModel? transactionViewModel)
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
 		InitializeComponent();
+        _transactionViewModel = transactionViewModel;
+        BindingContext = transactionViewModel;
 	}
     #endregion Constructor
 
     #region Property
-    public Transaction Transaction
+    public Transaction? Transaction
     {
         get => _transaction;
         set => _transaction = value;
     }
-    // Property to receive the 'type' parameter
-    public string Type
+
+    private string? _typeString;
+    public string? TypeString
     {
-        get => _transactionViewModel.Type;
-        set => _transactionViewModel.Type = value;
+        get => _typeString;
+        set
+        {
+            _typeString = value;
+
+            // Parse the string to enum
+            if (System.Enum.TryParse<TransactionType>(value, out var result))
+            {
+                Type = result;
+            }
+        }
     }
+
+
+    public TransactionType Type{ get; set; }
+    //// Property to receive the 'type' parameter
+    //public TransactionType Type
+    //{
+    //    get => _transactionViewModel.Type;
+    //    set => _transactionViewModel.Type = value;
+    //}
     #endregion Property
 
     #region Events
@@ -51,14 +72,14 @@ public partial class TransactionPage : ContentPage
                 // Update other fields
                 transactionViewModel.TransactionText = "Edit Transaction";
                 transactionViewModel.Id = Transaction.Id;
-                transactionViewModel.Type = Transaction.Type ?? string.Empty;
+                transactionViewModel.SelectedType = Type;
                 transactionViewModel.Amount = Transaction.Amount;
                 transactionViewModel.Reason = Transaction.Reason ?? string.Empty;   
                 transactionViewModel.Date = Transaction.Date;
             }
             else
             {
-                transactionViewModel.Type = Type;
+                transactionViewModel.SelectedType = Type;
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
                 await transactionViewModel.LoadCategoriesAsync(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.

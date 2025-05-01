@@ -79,6 +79,19 @@ namespace Traki.ViewModels
         {
 
         }
+
+        [RelayCommand]
+        private void OnAddMoneyClicked()
+        {
+            // Pass parameters as query parameters in the URL
+            Shell.Current.GoToAsync($"{nameof(TransactionPage)}?type=Income");
+
+        }
+        [RelayCommand]
+        private void OnWidthDrawMoneyClicked()
+        {
+            Shell.Current.GoToAsync($"{nameof(TransactionPage)}?type=Expense");
+        }
         #endregion Commands
 
         #region Private Methods

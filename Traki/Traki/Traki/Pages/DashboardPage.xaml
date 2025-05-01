@@ -69,7 +69,7 @@
             <Grid ColumnDefinitions="Auto, *, Auto"  Padding="20,0,20,0" ColumnSpacing="20">
                 <Button Text="Deposit"
                      Grid.Column="0" 
-                    Command="{Binding onAddMoneyClickedCommand}"
+                    Command="{Binding AddMoneyClickedCommand}"
                     WidthRequest="100"
                     HeightRequest="30"
                     CornerRadius="50"
@@ -82,7 +82,7 @@
 
                 <Button Text="Widthdraw"
                       Grid.Column="2" 
-                     Command="{Binding onWidthDrawMoneyClickedCommand}"
+                     Command="{Binding WidthDrawMoneyClickedCommand}"
                      WidthRequest="100"
                      HeightRequest="30"
                      CornerRadius="50"
