@@ -41,6 +41,20 @@ namespace Traki.Service
             return await _database.Table<Account>().ToListAsync();
         }
 
+        public async Task<List<Account>?> GetAccountByAccountIdAsync(int id)
+        {
+            await EnsureInitializedAsync();
+            return await _database.Table<Account>()
+                                  .Where(t => t.Id == id).ToListAsync();
+        }
+
+        public async Task<Account> GetAccountByAccountNameAsync(string accountName)
+        {
+            await EnsureInitializedAsync();
+            return await _database.Table<Account>()
+                                  .Where(t => t.Name == accountName).FirstOrDefaultAsync();
+        }
+
         public async Task<Account> AddAccountAsync(Account account)
         {
             await EnsureInitializedAsync(); // Critical to prevent hanging

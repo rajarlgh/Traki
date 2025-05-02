@@ -6,6 +6,8 @@ namespace TrakiLibrary.Interfaces
     {
         Task InitializeAsync();
         Task<List<Account>> GetAccountsAsync();
+        Task<List<Account>?> GetAccountByAccountIdAsync(int id);
+        Task<Account?> GetAccountByAccountNameAsync(string accountName);
         Task<Account> AddAccountAsync(Account account);
         Task DeleteAccountAsync(int? id);
         Task UpdateAccountAsync(Account account);

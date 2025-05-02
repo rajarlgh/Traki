@@ -169,7 +169,7 @@ namespace Core.ViewModels
 
             while (csv.Read())
             {
-                if (csv.GetField(0) == "date")
+                if (csv.GetField(0)?.ToLower() == "date")
                     continue;
 
                 //var date = DateTime.ParseExact(csv.GetField(0), "d/M/yyyy", CultureInfo.InvariantCulture);
@@ -204,8 +204,8 @@ namespace Core.ViewModels
                 Category? category = null;
 
                 if (!string.IsNullOrWhiteSpace(accCatField) &&
-                    !accCatField.Contains("From ") &&
-                    !accCatField.Contains("To ") &&
+                    !accCatField.Contains("From '") &&
+                    !accCatField.Contains("To '") &&
                     !accCatField.Contains("Initial balance '"))
                 {
                     if (!existingCategories.TryGetValue(accCatField, out category))
@@ -222,20 +222,42 @@ namespace Core.ViewModels
                     }
                 }
 
-
-                var transaction = new Transaction
+                bool isRecordAlreayExists = false;
+                if (accCatField.Contains("From '"))
                 {
-                    FromAccountId = account?.Id ?? 0,
-                    ToAccountId = transferredAccount?.Id,
-                    Category = category,
-                    CategoryId = category?.Id,
-                    Date = date,
-                    Amount = amount,
-                    Type = amount > 0 ? "Income" : "Expense",
-                    Reason = reason
-                };
+                    string accName = accCatField.Replace("From '", "");
+                    var accountName = accName.Substring(0, accName.Length - 1);
+                    var accountId = await _accountService.GetAccountByAccountNameAsync(accountName); ;
 
-                transactions.Add(transaction);
+                    var fromAccId = await _accountService.GetAccountByAccountNameAsync(accField);
+
+                    var t = await _transactionService.GetTransactionsAsync();
+                    t.Where(t => t.FromAccountId == accountId.Id && t.ToAccountId == fromAccId.Id);
+
+                    if (t.Count() > 0)
+                        isRecordAlreayExists = true;
+                    var transLocal = transactions.Where(t => t.FromAccountId == accountId.Id && t.ToAccountId == fromAccId.Id);
+                    if (transLocal.Count()>0)
+                        isRecordAlreayExists = true;
+                }
+
+
+                if (!isRecordAlreayExists)
+                {
+                    var transaction = new Transaction
+                    {
+                        FromAccountId = account?.Id ?? 0,
+                        ToAccountId = transferredAccount?.Id,
+                        Category = category,
+                        CategoryId = category?.Id,
+                        Date = date,
+                        Amount = amount,
+                        Type = amount > 0 ? "Income" : "Expense",
+                        Reason = reason
+                    };
+
+                    transactions.Add(transaction);
+                }
             }
 
             return transactions;

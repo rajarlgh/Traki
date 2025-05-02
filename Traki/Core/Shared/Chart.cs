@@ -61,7 +61,7 @@ namespace Core.Shared
                 if (accountId > 0)
                 {
                     filteredTransactions = transactions
-                        .Where(t => t.Date >= fromDate && t.Date <= toDate && t.AccountId == accountId)
+                        .Where(t => t.Date >= fromDate && t.Date <= toDate && t.FromAccountId == accountId)
                         .ToList();
                 }
                 else

@@ -115,8 +115,8 @@ namespace Traki.ViewModels
             var _transactions = accountDetails.Transactions;
             if (_transactions != null)
             {
-                var totalIncome = _transactions.Where(t => t.Type == "Income").Sum(t => t.Amount);
-                var totalExpenses = _transactions.Where(t => t.Type == "Expense").Sum(t => t.Amount);
+                var totalIncome = _transactions.Where(t => t.Type == "Income" && t.Date >= accountDetails.FromDate && t.Date <= accountDetails.ToDate).Sum(t => t.Amount);
+                var totalExpenses = _transactions.Where(t => t.Type == "Expense" && t.Date >= accountDetails.FromDate && t.Date <= accountDetails.ToDate).Sum(t => t.Amount);
 
                 this.Balance = totalIncome + totalExpenses;
             }

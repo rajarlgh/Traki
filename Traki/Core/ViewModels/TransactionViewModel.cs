@@ -116,7 +116,7 @@ namespace Core.ViewModels
                 Reason = Reason,
                 Type = this.SelectedType.ToString(),
                 Category = SelectedCategory,
-                AccountId = SelectedAccount?.Id ?? 0,
+                FromAccountId = SelectedAccount?.Id ?? 0,
                 Date = DateTime.Now
             };
 
