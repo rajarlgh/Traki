@@ -140,6 +140,7 @@ namespace Core.ViewModels
         private async Task<List<Transaction>> ReadCsv(string filePath)
         {
             var transactions = new List<Transaction>();
+            var rejectedTransactions = new List<Transaction>();
 
             if (!File.Exists(filePath))
                 throw new FileNotFoundException("File not found", filePath);
@@ -181,6 +182,11 @@ namespace Core.ViewModels
                 var accField = csv.GetField(1);
                 var accCatField = csv.GetField(2);
                 var amount = decimal.Parse(csv.GetField(3) ?? "0");
+                // Convert the Amount to positive value.
+                if (accCatField != null && ( accCatField.Contains("From '") || accCatField.Contains("To '")))
+                {
+                    amount = (amount <0) ? amount * -1 : amount;
+                }
                 var reason = csv.GetField(7);
 
                 // Get or add account
@@ -242,22 +248,24 @@ namespace Core.ViewModels
                 }
 
 
+                var transaction = new Transaction
+                {
+                    FromAccountId = account?.Id ?? 0,
+                    ToAccountId = transferredAccount?.Id,
+                    Category = category,
+                    CategoryId = category?.Id,
+                    Date = date,
+                    Amount = amount,
+                    Type = amount > 0 ? "Income" : "Expense",
+                    Reason = reason
+                };
+
                 if (!isRecordAlreayExists)
                 {
-                    var transaction = new Transaction
-                    {
-                        FromAccountId = account?.Id ?? 0,
-                        ToAccountId = transferredAccount?.Id,
-                        Category = category,
-                        CategoryId = category?.Id,
-                        Date = date,
-                        Amount = amount,
-                        Type = amount > 0 ? "Income" : "Expense",
-                        Reason = reason
-                    };
-
                     transactions.Add(transaction);
                 }
+                else
+                    rejectedTransactions.Add(transaction);
             }
 
             return transactions;
