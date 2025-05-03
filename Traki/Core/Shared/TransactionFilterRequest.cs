@@ -12,5 +12,6 @@ namespace Core.Shared
         public DateTime ToDate { get; set; } = DateTime.Now;
         public List<Category>? Categories { get; set; }
         public SkiaSharp.SKColor SKColor { get; set; } 
+        public List<Account>? Accounts { get; set; }
     }
 }

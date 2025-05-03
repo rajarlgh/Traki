@@ -17,7 +17,7 @@ namespace Core.ViewModels
         #region Private Variables
         private readonly ITransactionService? _transactionService;
         private readonly ICategoryService? _categoryService;
-
+        private readonly IAccountService? _accountService;
         #endregion Private Variables
 
 #pragma warning disable
@@ -30,11 +30,12 @@ namespace Core.ViewModels
 
         #region Public Constructor
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public IncomeViewModel(ITransactionService? transactionService, ICategoryService? categoryService)
+        public IncomeViewModel(ITransactionService? transactionService, ICategoryService? categoryService, IAccountService accountService)
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         {
             _transactionService = transactionService;
             _categoryService = categoryService;
+            _accountService = accountService;
             StrongReferenceMessenger.Default.Register(this);
 
         }
@@ -182,6 +183,11 @@ namespace Core.ViewModels
                 throw new InvalidOperationException("Category service is not initialized.");
 
             var categories = await _categoryService.GetCategoriesAsync();
+            if (_accountService == null)
+                throw new InvalidOperationException("Category service is not initialized.");
+
+            var accounts = await _accountService.GetAccountsAsync();
+
             var accountDetails = new TransactionFilterRequest() 
             { 
                 Transactions = transactions, 
@@ -189,7 +195,8 @@ namespace Core.ViewModels
                 AccountId=accountId,
                 FromDate=fromDate,
                 ToDate=toDate,
-                Categories = categories
+                Categories = categories,
+                Accounts = accounts
             };
             this.PublishAccountChanged(accountDetails);
             var chart = new Chart();

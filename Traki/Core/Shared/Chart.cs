@@ -53,6 +53,7 @@ namespace Core.Shared
             var fromDate = accountDetails.FromDate;
             var toDate = accountDetails.ToDate;
             var categories = accountDetails.Categories;
+            var accounts = accountDetails.Accounts;
 
             var filteredTransactions = new List<Transaction>();
 
@@ -76,6 +77,7 @@ namespace Core.Shared
 
             if (filteredTransactions != null && categories != null)
             {
+                // Group by categoryI
                 var groupedData = filteredTransactions
                     .Where(t => t.Type == transactionType.ToString() && t.CategoryId != null)
                     .GroupBy(t => t.CategoryId)
@@ -86,22 +88,46 @@ namespace Core.Shared
 
                         return new
                         {
-                            CategoryId = categoryId,
-                            CategoryName = categoryName,
+                            Id = categoryId,
+                            Name = categoryName,
                             TotalAmount = g.Sum(t => t.Amount)
                         };
                     })
                     .ToList();
+                var groupByToAccount = filteredTransactions
+                    .Where(t => t.Type == transactionType.ToString() && t.FromAccountId > 0 && t.ToAccountId > 0)
+                    .GroupBy(t => t.ToAccountId)
+                    .Select(g =>
+                    {
+                        if (accounts != null)
+                        {
+                            var accountId = g.Key;
+                            var accountName = accounts.FirstOrDefault(c => c.Id == accountId)?.Name;
 
+                            return new
+                            {
+                                Id = accountId,
+                                Name = accountName,
+                                TotalAmount = g.Sum(t => t.Amount)
+                            };
+                        }
+
+                        return null; // Ensures all code paths return something
+                    })
+                    .Where(x => x != null) // Filter out nulls
+                    .ToList();
+
+
+                groupedData.AddRange(groupByToAccount);
                 var t = groupedData.Count();
                 result = groupedData.Select(data => new ChartEntryWrapper
                 {
 
-                    Label = data.CategoryName,
+                    Label = data.Name,
                     ValueLabel = data.TotalAmount.ToString("F0"),
                     Value = (float)data.TotalAmount, // 👈 SET THIS
-                    Color = this.GetCategoryColor(data.CategoryName ?? string.Empty),
-                    CategoryId = data.CategoryId,
+                    Color = this.GetCategoryColor(data.Name ?? string.Empty),
+                    CategoryId = data.Id,
                 }).ToList();
             }
             return result;
