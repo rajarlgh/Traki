@@ -1,6 +1,8 @@
 ﻿using Core.Entity;
 using Core.Enum;
 using SkiaSharp;
+using System.Collections.Generic;
+using System.Linq;
 using TrakiLibrary.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -49,20 +51,22 @@ namespace Core.Shared
 
             var filterOption = accountDetails.FilterOption;
             var transactions = accountDetails.Transactions;
-            var accountId = accountDetails.AccountId;
+            var selectedAccountId = accountDetails.AccountId;
             var fromDate = accountDetails.FromDate;
             var toDate = accountDetails.ToDate;
             var categories = accountDetails.Categories;
             var accounts = accountDetails.Accounts;
 
+
             var filteredTransactions = new List<Transaction>();
 
             if (filterOption != FilterOption.All && transactions != null)
             {
-                if (accountId > 0)
+                if (selectedAccountId > 0)
                 {
                     filteredTransactions = transactions
-                        .Where(t => t.Date >= fromDate && t.Date <= toDate && t.FromAccountId == accountId)
+                        .Where(t => t.Date >= fromDate && t.Date <= toDate &&
+                                   (t.FromAccountId == selectedAccountId || t.ToAccountId == selectedAccountId))
                         .ToList();
                 }
                 else
@@ -73,64 +77,111 @@ namespace Core.Shared
                 }
             }
             else
-            { filteredTransactions = transactions; }
-
-            if (filteredTransactions != null && categories != null)
             {
-                // Group by categoryI
-                var groupedData = filteredTransactions
+                filteredTransactions = transactions ?? new List<Transaction>();
+            }
+
+            if (filteredTransactions.Any() && categories != null)
+            {
+                IEnumerable<AggregatedTransaction> outgoing = Enumerable.Empty<AggregatedTransaction>();
+
+                if (transactionType == TransactionType.Expense)
+                {
+                    foreach (var t in filteredTransactions)
+                    {
+                        if (t.Type == TransactionType.Income.ToString()
+                            && t.FromAccountId == selectedAccountId
+                            && t.FromAccountId > 0
+                            && t.ToAccountId > 0)
+                        {
+                            t.Type = TransactionType.Expense.ToString(); // Correct it
+                        }
+                    }
+
+                    // Scenario 1: Outgoing transactions (act as Expense for selected account)
+                    outgoing = filteredTransactions
+                    .Where(t => t.Type == transactionType.ToString()
+                                && t.FromAccountId == selectedAccountId
+                                && t.FromAccountId > 0
+                                && t.ToAccountId > 0)
+                    .GroupBy(t => t.ToAccountId)
+                    .Select(g =>
+                    {
+                        var accountName = accounts?.FirstOrDefault(a => a.Id == g.Key)?.Name;
+                        return new AggregatedTransaction
+                        {
+                            Id = g.Key,
+                            Name = accountName,
+                            TotalAmount = g.Sum(t => t.Amount * -1) // Subtract for sender
+                        };
+                    });
+                    var t1 = outgoing.ToList();
+                }
+                IEnumerable<AggregatedTransaction> incoming = Enumerable.Empty<AggregatedTransaction>();
+
+                if (transactionType == TransactionType.Income)
+                {
+                    // Scenario 2: Incoming transactions (act as Income for selected account)
+                  incoming = filteredTransactions
+                        .Where(t => t.Type == transactionType.ToString()
+                                    && t.ToAccountId == selectedAccountId
+                                    && t.FromAccountId > 0
+                                    && t.ToAccountId > 0)
+                        .GroupBy(t => t.FromAccountId)
+                        .Select(g =>
+                        {
+                            var accountName = accounts?.FirstOrDefault(a => a.Id == g.Key)?.Name;
+                            return new AggregatedTransaction
+                            {
+                                Id = g.Key,
+                                Name = accountName,
+                                TotalAmount = g.Sum(t => t.Amount) // Add for receiver
+                            };
+                        });
+                    var t2 = incoming.ToList();
+                }
+                // Group by Category as before (for non-transfer transactions)
+                var categoryGroups = filteredTransactions
                     .Where(t => t.Type == transactionType.ToString() && t.CategoryId != null)
                     .GroupBy(t => t.CategoryId)
                     .Select(g =>
                     {
-                        var categoryId = g.Key;
-                        var categoryName = categories.FirstOrDefault(c => c.Id == categoryId)?.Name;
-
-                        return new
+                        var categoryName = categories.FirstOrDefault(c => c.Id == g.Key)?.Name;
+                        return new AggregatedTransaction
                         {
-                            Id = categoryId,
+                            Id = g.Key,
                             Name = categoryName,
                             TotalAmount = g.Sum(t => t.Amount)
                         };
-                    })
-                    .ToList();
-                var groupByToAccount = filteredTransactions
-                    .Where(t => t.Type == transactionType.ToString() && t.FromAccountId > 0 && t.ToAccountId > 0)
-                    .GroupBy(t => t.ToAccountId)
-                    .Select(g =>
-                    {
-                        if (accounts != null)
-                        {
-                            var accountId = g.Key;
-                            var accountName = accounts.FirstOrDefault(c => c.Id == accountId)?.Name;
+                    });
+                var t3 = categoryGroups.ToList();
 
-                            return new
-                            {
-                                Id = accountId,
-                                Name = accountName,
-                                TotalAmount = g.Sum(t => t.Amount)
-                            };
-                        }
-
-                        return null; // Ensures all code paths return something
-                    })
-                    .Where(x => x != null) // Filter out nulls
+                //categoryGroups.ToList().AddRange(outgoing.ToList());
+                //categoryGroups.ToList().AddRange(incoming.ToList());
+                // Merge all results
+                var merged = categoryGroups
+                    .Concat(outgoing)
+                    .Concat(incoming)
                     .ToList();
 
-
-                groupedData.AddRange(groupByToAccount);
-                var t = groupedData.Count();
-                result = groupedData.Select(data => new ChartEntryWrapper
+                result = merged.Select(data => new ChartEntryWrapper
                 {
-
                     Label = data.Name,
                     ValueLabel = data.TotalAmount.ToString("F0"),
-                    Value = (float)data.TotalAmount, // 👈 SET THIS
+                    Value = (float)data.TotalAmount,
                     Color = this.GetCategoryColor(data.Name ?? string.Empty),
-                    CategoryId = data.Id,
+                    CategoryId = data.Id
                 }).ToList();
             }
+
             return result;
         }
     }
+    public class AggregatedTransaction
+    {
+        public int? Id { get; set; }
+        public string Name { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
+
 }
