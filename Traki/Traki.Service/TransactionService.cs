@@ -16,15 +16,15 @@ namespace Traki.Service
         public TransactionService(string dbPath)
         {
             _database = new SQLiteAsyncConnection(dbPath);
-            _database.CreateTableAsync<Transaction>().Wait();
+            //_database.CreateTableAsync<Transaction>().Wait();
         }
         #endregion Constructors
 
         #region Public Methods
-        public Task<List<Transaction>> GetTransactionsAsync()
+        public async Task<List<Transaction>> GetTransactionsAsync()
         {
-
-            return _database.Table<Transaction>().ToListAsync();
+            await EnsureInitializedAsync();
+            return await _database.Table<Transaction>().ToListAsync();
         }
 
         public async Task<List<Transaction>?> GetTransactionsByCategoryIdAsync(int id)

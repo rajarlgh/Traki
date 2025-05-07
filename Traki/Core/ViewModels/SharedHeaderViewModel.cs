@@ -18,8 +18,12 @@ namespace Core.ViewModels
 {
     public partial class SharedHeaderViewModel : ObservableObject
     {
+        #region Private Variable
+        private bool _isInitializing;
+        #endregion Private Variable
+
         #region Filter 
-#pragma warning disable 
+#pragma warning disable
         [ObservableProperty] private bool isIntervalFilterSelected;
         [ObservableProperty] private bool isDateFilterSelected;
         [ObservableProperty] private bool isMonthFilterSelected;
@@ -77,8 +81,17 @@ namespace Core.ViewModels
 
         partial void OnSelectedFilterOptionChanged(FilterOption? value)
         {
+            if (this._isInitializing)
+                return;
+            _ = HandleSelectedFilterOptionChangedAsync(value);
+
+        }
+        private async Task HandleSelectedFilterOptionChangedAsync(FilterOption? value)
+        {
             if (value != null && value == FilterOption.All)
             {
+                if (SelectedAccount != null && SelectedAccount.Id == 0)
+                   await this.LoadAccountsAsync(-1);
                 var filterState = new FilterState
                 {
                     SelectedFilterOption = selectedFilterOption,
@@ -134,24 +147,33 @@ namespace Core.ViewModels
         #endregion Private Methods
 
         #region Public Methods
+
         public async Task LoadAccountsAsync(int accountId)
         {
+            _isInitializing = true;
             if (_accountService != null)
             {
                 var accounts = await _accountService.GetAccountsAsync();
-                this.ListOfAccounts = new ObservableCollection<Account>(accounts);
-                this.ListOfAccounts.Add(new Account { Id = -1, Name = "All" });
-                this.ListOfAccounts.Add(new Account { Id = -2, Name = "Add New Account" });
+                var lstAccount = new ObservableCollection<Account>(accounts);
+                lstAccount.Add(new Account { Id = -1, Name = "All" });
+                lstAccount.Add(new Account { Id = -2, Name = "Add New Account" });
+
+                this.ListOfAccounts = lstAccount;
+
                 var selectedAccount = accounts.FirstOrDefault(r => r.Id == accountId);
                 if (selectedAccount != null)
                 {
-                    SelectedAccount = ListOfAccounts.FirstOrDefault(a => a.Id == selectedAccount.Id);
+                    SelectedAccount = lstAccount.FirstOrDefault(a => a.Id == selectedAccount.Id);
+                }
+                else
+                {
+                    SelectedAccount = lstAccount.FirstOrDefault(a => a.Id == -1);
                 }
 
-                else
-                    SelectedAccount = this.ListOfAccounts.FirstOrDefault(a => a.Id == -1);
+                _isInitializing = false;
             }
         }
+
 
         public void UnregisterMessenger()
         {
@@ -164,6 +186,10 @@ namespace Core.ViewModels
 
         partial void OnSelectedAccountChanged(Account? value)
         {
+            // Skip logic when setting the value programmatically
+            if (_isInitializing || value == null)
+                return;
+
             if (value != null)
             {
                 if (value.Name == "Add New Account")

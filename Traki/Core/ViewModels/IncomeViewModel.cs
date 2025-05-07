@@ -158,7 +158,7 @@ namespace Core.ViewModels
                 toDate = filter.ToDate;
             }
 
-            int accountId = 0;
+            int accountId = -1;
             if (filter != null && filter.SelectedAccount != null)
             {
                 accountId = filter.SelectedAccount.Id;

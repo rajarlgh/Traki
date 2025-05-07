@@ -51,6 +51,7 @@ namespace Core.Shared
 
             var filterOption = accountDetails.FilterOption;
             var transactions = accountDetails.Transactions;
+                transactions = transactions?.Where(r => r.Type == transactionType.ToString()).ToList();
             var selectedAccountId = accountDetails.AccountId;
             var fromDate = accountDetails.FromDate;
             var toDate = accountDetails.ToDate;
@@ -90,7 +91,7 @@ namespace Core.Shared
                     foreach (var t in filteredTransactions)
                     {
                         if (t.Type == TransactionType.Income.ToString()
-                            && (t.FromAccountId == 0? true: t.FromAccountId == selectedAccountId)
+                            && (selectedAccountId == -1? true: t.FromAccountId == selectedAccountId)
                             && t.FromAccountId > 0
                             && t.ToAccountId > 0)
                         {
@@ -101,7 +102,7 @@ namespace Core.Shared
                     // Scenario 1: Outgoing transactions (act as Expense for selected account)
                     outgoing = filteredTransactions
                     .Where(t => t.Type == transactionType.ToString()
-                                && (t.FromAccountId == 0? true: t.FromAccountId == selectedAccountId)
+                                && (selectedAccountId == -1? true: t.FromAccountId == selectedAccountId)
                                 && t.FromAccountId > 0
                                 && t.ToAccountId > 0)
                     .GroupBy(t => t.ToAccountId)
@@ -124,7 +125,7 @@ namespace Core.Shared
                     // Scenario 2: Incoming transactions (act as Income for selected account)
                   incoming = filteredTransactions
                         .Where(t => t.Type == transactionType.ToString()
-                                    && (t.FromAccountId == 0 ? true : t.ToAccountId == selectedAccountId)
+                                    && (selectedAccountId == -1 ? true : t.ToAccountId == selectedAccountId)
                                     && t.FromAccountId > 0
                                     && t.ToAccountId > 0)
                         .GroupBy(t => t.FromAccountId)
@@ -140,9 +141,23 @@ namespace Core.Shared
                         });
                     var t2 = incoming.ToList();
                 }
+                var t4 = filteredTransactions
+                .Where(t =>
+                    (selectedAccountId == -1 || t.FromAccountId == selectedAccountId) &&
+                    t.Type == transactionType.ToString() &&
+                    t.CategoryId != null
+                )
+                .ToList();
+
+                var vt = t4.ToList();
+
                 // Group by Category as before (for non-transfer transactions)
                 var categoryGroups = filteredTransactions
-                    .Where(t => t.FromAccountId == 0 ? true : t.FromAccountId == selectedAccountId && t.Type == transactionType.ToString() && t.CategoryId != null)
+                    .Where(t =>
+                    (selectedAccountId == -1 || t.FromAccountId == selectedAccountId) &&
+                    t.Type == transactionType.ToString() &&
+                    t.CategoryId != null
+                    )
                     .GroupBy(t => t.CategoryId)
                     .Select(g =>
                     {
