@@ -6,24 +6,27 @@ namespace TrakiLibrary.Models
     public class TransactionByCategory
     {
         [PrimaryKey, AutoIncrement]
-        public int Id { get; set; }  // DB-generated primary key
+        public int Id { get; set; }
 
-        [ForeignKey(typeof(Category))]  // Foreign key linking to Account (FromAccount)
-        public int? CategoryId { get; set; }             // Foreign key linking to Category
-        public required decimal Amount { get; set; }     // must provide amount
-        public required string Type { get; set; }        // must provide type ("Income"/"Expense")
+        [ForeignKey(typeof(Category))]
+        public int? CategoryId { get; set; }
 
-        public string? Reason { get; set; }              // optional reason
+        public decimal Amount { get; set; }  // removed `required`
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public string Type { get; set; }     // removed `required`
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        public DateTime Date { get; set; }               // transaction date (no default, must set explicitly)
-        public DateTime CreatedDate { get; set; } = DateTime.Now;  // defaults to now
-        public DateTime? UpdatedDate { get; set; }                   // optional updated date
+        public string? Reason { get; set; }
 
-        public string CreatedBy { get; set; } = "User";             // defaults to "User"
-        public string? UpdatedBy { get; set; }                      // optional updated by
+        public DateTime TransactionDate { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime? UpdatedDate { get; set; }
 
-        // Navigation property to the Category (optional, but useful for loading the associated category)
+        public string CreatedBy { get; set; } = "User";
+        public string? UpdatedBy { get; set; }
+
         [ManyToOne]
-        public Category? Category { get; set; }  // navigation to Category
+        public Category? Category { get; set; }
+
     }
 }

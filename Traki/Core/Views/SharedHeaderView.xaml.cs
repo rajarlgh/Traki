@@ -22,7 +22,6 @@ public partial class SharedHeaderView : ContentView
         if (serviceProvider != null)
             {
                 var accountService = serviceProvider.GetService<IAccountService>();
-            var dbPath = Preferences.Get("DbPath", string.Empty);
 
             _viewModel = new SharedHeaderViewModel(accountService!);
             this.BindingContext = _viewModel;

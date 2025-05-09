@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Core.Enum;
 using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
@@ -15,6 +16,8 @@ namespace Core.ViewModels
         private readonly ITransactionService? _transactionService;
         private readonly IAccountService? _accountService;
         private readonly ICategoryService? _categoryService;
+        private readonly ITransactionByCategoryService _trakiTransactionByCategoryService;
+        private readonly ITransactionByAccountService _trakiTransactionByAccountService;
         #endregion Private Variables
 
         #region Observable Property
@@ -38,13 +41,15 @@ namespace Core.ViewModels
         #endregion Observable Property
 
         #region Constructor
-        public ExcelUploaderViewModel(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService)
+        public ExcelUploaderViewModel(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService, ITransactionByCategoryService trakiTransactionByCategoryService, ITransactionByAccountService transactionByAccountService)
         {
             _transactionService = transactionService;
             _accountService = accountService;
             _categoryService = categoryService;
             CanUpload = false; // Upload button is disabled initially
             _categoryService = categoryService;
+            _trakiTransactionByCategoryService = trakiTransactionByCategoryService;
+            _trakiTransactionByAccountService = transactionByAccountService;
         }
         #endregion Constructor
 
@@ -92,6 +97,16 @@ namespace Core.ViewModels
                 int batchCount = (total + batchSize - 1) / batchSize; // Calculate the number of batches
                 int index = 0;
 
+                foreach (var transaction in transactionByCategorys)
+                {
+                    _trakiTransactionByCategoryService.AddTransactionAsync(transaction);
+                }
+
+                foreach (var transaction in transactionByAccounts)
+                {
+                    _trakiTransactionByAccountService.AddTransactionAsync(transaction);
+                }
+
                 // Process transactions in batches
                 for (int i = 0; i < batchCount; i++)
                 {
@@ -137,6 +152,10 @@ namespace Core.ViewModels
             }
         }
 
+
+        List<TransactionByCategory> transactionByCategorys = new List<TransactionByCategory>();
+        List<TransactionByAccount> transactionByAccounts = new List<TransactionByAccount>();
+
         private async Task<List<Transaction>> ReadCsv(string filePath)
         {
             var transactions = new List<Transaction>();
@@ -164,114 +183,153 @@ namespace Core.ViewModels
                 .Where(c => !string.IsNullOrEmpty(c.Name))
                 .ToDictionary(c => c.Name!, c => c);
 
-
             using var reader = new StreamReader(filePath);
             using var csv = new CsvReader(reader, config);
 
             while (csv.Read())
             {
-                if (csv.GetField(0)?.ToLower() == "date")
+                // Skip the header
+                if (csv.GetField((int)FileColumns.Date)?.ToLower() == "date")
                     continue;
 
-                //var date = DateTime.ParseExact(csv.GetField(0), "d/M/yyyy", CultureInfo.InvariantCulture);
-                var date = DateTime.ParseExact(
-                            csv.GetField(0) ?? throw new InvalidOperationException("Date field is missing."),
+                var transactionDate = DateTime.ParseExact(
+                            csv.GetField((int)FileColumns.Date) ?? throw new InvalidOperationException("Date field is missing."),
                             "d/M/yyyy",
                             CultureInfo.InvariantCulture);
 
-                var accField = csv.GetField(1);
-                var accCatField = csv.GetField(2);
-                var amount = decimal.Parse(csv.GetField(3) ?? "0");
-                // Convert the Amount to positive value.
-                if (accCatField != null && ( accCatField.Contains("From '") || accCatField.Contains("To '")))
+                var accountName = csv.GetField((int)FileColumns.AccountName);
+                var categoryOrTransferInfo = csv.GetField((int)FileColumns.CategoryName);
+                var amountValue = decimal.Parse(csv.GetField((int)FileColumns.Amount) ?? "0");
+                var currency = csv.GetField((int)FileColumns.Currency);
+
+                // Convert the Amount to positive value if it’s a transfer
+                //if (categoryOrTransferInfo != null && (categoryOrTransferInfo.Contains("From '") || categoryOrTransferInfo.Contains("To '")))
+                //{
+                //    amountValue = (amountValue < 0) ? amountValue * -1 : amountValue;
+                //}
+
+                var description = csv.GetField((int)FileColumns.Description);
+
+                // Get or create an account
+                if (!existingAccounts.TryGetValue(accountName ?? string.Empty, out var account) && accountName != null && currency != null)
                 {
-                    amount = (amount <0) ? amount * -1 : amount;
-                }
-                var reason = csv.GetField(7);
-
-                // Get or add account
-                if (!existingAccounts.TryGetValue(accField ?? string.Empty, out var account))
-                {
-                    account = await _accountService.AddAccountAsync(new Account { Name = accField });
-                    existingAccounts[accField ?? string.Empty] = account;
-                }
-
-                // Get or derive transferred account
-                var transferredAccount = await DeriveAccountAsync(accCatField ?? string.Empty, existingAccounts);
-
-                // Update account balance if needed
-                if (accCatField != null && accCatField.Contains("Initial balance '"))
-                {
-                    account.InititalAccBalance = amount;
-                    account.InitialAccDate = DateTime.Now;
-                    await _accountService.UpdateAccountAsync(account);
-                }
-
-                Category? category = null;
-
-                if (!string.IsNullOrWhiteSpace(accCatField) &&
-                    !accCatField.Contains("From '") &&
-                    !accCatField.Contains("To '") &&
-                    !accCatField.Contains("Initial balance '"))
-                {
-                    if (!existingCategories.TryGetValue(accCatField, out category))
+                    decimal initialAccBalance = 0;
+                    // Update account balance if needed
+                    if (categoryOrTransferInfo != null && categoryOrTransferInfo.Contains("Initial balance '") && account != null)
                     {
-                        var categoryType = amount > 0 ? "Income" : "Expense";
+                        initialAccBalance = amountValue;
+                    }
+                    account = await _accountService.AddAccountAsync(new Account { Name = accountName, Currency = currency, InititalAccBalance = initialAccBalance });
+                    existingAccounts[accountName ?? string.Empty] = account;
+                }
+
+                // Get or derive transferred account (ToAccount)
+                var transferredAccount = await DeriveAccountAsync(categoryOrTransferInfo ?? string.Empty, currency ?? string.Empty, existingAccounts);
+
+
+                // Create the Category if not exists.
+                Category? category = null;
+                if (!string.IsNullOrWhiteSpace(categoryOrTransferInfo) &&
+                    !categoryOrTransferInfo.Contains("From '") &&
+                    !categoryOrTransferInfo.Contains("To '") &&
+                    !categoryOrTransferInfo.Contains("Initial balance '"))
+                {
+                    if (!existingCategories.TryGetValue(categoryOrTransferInfo, out category))
+                    {
+                        var categoryType = amountValue > 0 ? "Income" : "Expense";
 
                         category = await _categoryService.AddCategoryAsync(new Category
                         {
-                            Name = accCatField,
+                            Name = categoryOrTransferInfo,
                             Type = categoryType
                         });
 
-                        existingCategories[accCatField] = category;
+                        existingCategories[categoryOrTransferInfo] = category;
                     }
                 }
 
-                bool isRecordAlreayExists = false;
-                if (accCatField.Contains("From '"))
+                bool isRecordAlreadyExists = false;
+                if (categoryOrTransferInfo != null && categoryOrTransferInfo.Contains("From '") && accountName != null)
                 {
-                    string accName = accCatField.Replace("From '", "");
-                    var accountName = accName.Substring(0, accName.Length - 1);
-                    var accountId = await _accountService.GetAccountByAccountNameAsync(accountName); ;
+                    string transferAccountNamePart = categoryOrTransferInfo.Replace("From '", "");
+                    var transferAccountName = transferAccountNamePart.Substring(0, transferAccountNamePart.Length - 1);
+                    var sourceAccount = await _accountService.GetAccountByAccountNameAsync(transferAccountName);
 
-                    var fromAccId = await _accountService.GetAccountByAccountNameAsync(accField);
+                    var destinationAccount = await _accountService.GetAccountByAccountNameAsync(accountName);
 
-                    var t = await _transactionService.GetTransactionsAsync();
-                    t.Where(t => t.FromAccountId == accountId.Id && t.ToAccountId == fromAccId.Id);
+                    if (_transactionService != null && sourceAccount != null && destinationAccount != null)
+                    {
+                        var existingTransactions = await _transactionService.GetTransactionsAsync();
+                        var matchingExistingTransactions = existingTransactions
+                            .Where(t => t.FromAccountId == sourceAccount.Id && t.ToAccountId == destinationAccount.Id);
 
-                    if (t.Count() > 0)
-                        isRecordAlreayExists = true;
-                    var transLocal = transactions.Where(t => t.FromAccountId == accountId.Id && t.ToAccountId == fromAccId.Id);
-                    if (transLocal.Count()>0)
-                        isRecordAlreayExists = true;
+                        if (matchingExistingTransactions.Any())
+                            isRecordAlreadyExists = true;
+
+                        var matchingNewTransactions = transactions
+                            .Where(t => t.FromAccountId == sourceAccount.Id && t.ToAccountId == destinationAccount.Id);
+
+                        if (matchingNewTransactions.Any())
+                            isRecordAlreadyExists = true;
+                    }
                 }
 
-
-                var transaction = new Transaction
+                if (transferredAccount != null)
                 {
-                    FromAccountId = account?.Id ?? 0,
-                    ToAccountId = transferredAccount?.Id,
-                    Category = category,
-                    CategoryId = category?.Id,
-                    Date = date,
-                    Amount = amount,
-                    Type = amount > 0 ? "Income" : "Expense",
-                    Reason = reason
-                };
+                    var transactionByAccount = new TransactionByAccount
+                    {
+                        SourceAccountId = amountValue > 0 ? (transferredAccount?.Id ?? 0) :(account?.Id ?? 0),
+                        DestinationAccountId = amountValue > 0 ? (account?.Id ?? 0): (transferredAccount?.Id ?? 0),
+                        TransactionDate = transactionDate,
+                        Amount = amountValue,
+                        Type = amountValue > 0 ? TransactionType.Income.ToString() : TransactionType.Expense.ToString(),
+                        Reason = description,
+                        FromAccount = account,
+                        ToAccount = transferredAccount,
+                    };
+                    transactionByAccounts.Add(transactionByAccount);
+                }
+                else
+                {
+                    var transactionByCategory = new TransactionByCategory
+                    {
+                        CategoryId = category?.Id ?? 0,
+                        TransactionDate = transactionDate,
+                        Amount = amountValue,
+                        Type = amountValue > 0 ? TransactionType.Income.ToString() : TransactionType.Expense.ToString(),
+                        Reason = description,
+                        Category = category,
+                    };
+                    transactionByCategorys.Add(transactionByCategory);
+                }
 
-                if (!isRecordAlreayExists)
+                    var transaction = new Transaction
+                    {
+                        FromAccountId = account?.Id ?? 0,
+                        ToAccountId = transferredAccount?.Id,
+                        Category = category,
+                        CategoryId = category?.Id,
+                        Date = transactionDate,
+                        Amount = amountValue,
+                        Type = amountValue > 0 ? "Income" : "Expense",
+                        Reason = description
+                    };
+
+                if (!isRecordAlreadyExists)
                 {
                     transactions.Add(transaction);
                 }
                 else
+                {
                     rejectedTransactions.Add(transaction);
+                }
             }
 
             return transactions;
         }
 
-        private async Task<Account?> DeriveAccountAsync(string accountField, Dictionary<string, Account> accountCache)
+
+        private async Task<Account?> DeriveAccountAsync(string accountField, string currency, Dictionary<string, Account> accountCache)
         {
             string? accName = null;
 
@@ -290,7 +348,7 @@ namespace Core.ViewModels
 
             if (_accountService != null)
             {
-                account = await _accountService.AddAccountAsync(new Account { Name = accName });
+                account = await _accountService.AddAccountAsync(new Account { Name = accName, Currency = currency });
                 accountCache[accName] = account;
                 return account;
             }
@@ -311,5 +369,16 @@ namespace Core.ViewModels
             UploadStatus = null;
         }
         #endregion Public Methods
+    }
+
+    public enum FileColumns
+    {
+        Date,
+        AccountName,
+        CategoryName,
+        Amount,
+        Currency,
+        ConvertedCurrency,
+        Description
     }
 }

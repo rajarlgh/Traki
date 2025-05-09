@@ -27,6 +27,9 @@ namespace Traki.Droid
             RegisterService<IAccountService, AccountService>(builder, dbPath);
             RegisterService<ITransactionService, TransactionService>(builder, dbPath);
             RegisterService<ICategoryService, CategoryService>(builder, dbPath);
+            RegisterService<ITransactionByCategoryService, TransactionByCategoryService>(builder, dbPath);
+            RegisterService<ITransactionByAccountService, TransactionByAccountService>(builder, dbPath);
+
 
             builder.UseSharedMauiApp();
 

@@ -8,8 +8,10 @@ namespace TrakiLibrary.Models
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
-        public required string Name { get; set; } // e.g., "Savings Account"
-        public required string Currency { get; set; } // e.g., "USD", "EUR"
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public string Name { get; set; } // e.g., "Savings Account"
+        public string Currency { get; set; } // e.g., "USD", "EUR"
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         public decimal? InititalAccBalance { get; set; }
         public DateTime InitialAccDate { get; set; } = DateTime.Now;

@@ -9,17 +9,19 @@ namespace TrakiLibrary.Models
         public int Id { get; set; }  // DB-generated primary key
 
         [ForeignKey(typeof(Account))]  // Foreign key linking to Account (FromAccount)
-        public required int FromAccountId { get; set; }  // must link to account
+        public int SourceAccountId { get; set; }  // must link to account
 
         [ForeignKey(typeof(Account))]  // Foreign key linking to Account (ToAccount)
-        public required int ToAccountId { get; set; }    // must link to account
+        public int DestinationAccountId { get; set; }    // must link to account
 
-        public required decimal Amount { get; set; }     // must provide amount
-        public required string Type { get; set; }        // must provide type ("Income"/"Expense")
+        public decimal Amount { get; set; }     // must provide amount
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public string Type { get; set; }        // must provide type ("Income"/"Expense")
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         public string? Reason { get; set; }              // optional reason
 
-        public DateTime Date { get; set; }               // transaction date (no default, must set explicitly)
+        public DateTime TransactionDate { get; set; }               // transaction date (no default, must set explicitly)
         public DateTime CreatedDate { get; set; } = DateTime.Now;  // defaults to now
         public DateTime? UpdatedDate { get; set; }                   // optional updated date
 
@@ -32,5 +34,6 @@ namespace TrakiLibrary.Models
 
         [ManyToOne]
         public Account? ToAccount { get; set; }    // Navigation to the destination account
+
     }
 }

@@ -66,7 +66,7 @@ namespace Traki.Service
             {
                 if (!_isInitialized)
                 {
-                    await _database.CreateTableAsync<Category>();
+                    await _database.CreateTableAsync<Transaction>();
                     _isInitialized = true;
                 }
             }
