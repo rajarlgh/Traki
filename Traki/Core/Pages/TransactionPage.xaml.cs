@@ -5,13 +5,13 @@ using TrakiLibrary.Models;
 
 namespace Core.Pages;
 
-[QueryProperty(nameof(Transaction), "Transaction")]
+[QueryProperty(nameof(TransactionByCategory), "Transaction")]
 [QueryProperty(nameof(TypeString), "type")]
 public partial class TransactionPage : ContentPage
 {
     #region Private Variables
     private TransactionViewModel? _transactionViewModel;
-    private Transaction? _transaction;
+    private TransactionByCategory? _transactionByCategory;
     private ICategoryService? _categoryService;
     #endregion Private Variables
     #region Constructor
@@ -25,10 +25,10 @@ public partial class TransactionPage : ContentPage
     #endregion Constructor
 
     #region Property
-    public Transaction? Transaction
+    public TransactionByCategory? TransactionByCategory
     {
-        get => _transaction;
-        set => _transaction = value;
+        get => _transactionByCategory;
+        set => _transactionByCategory = value;
     }
 
     private string? _typeString;
@@ -65,15 +65,15 @@ public partial class TransactionPage : ContentPage
 
         if (BindingContext is TransactionViewModel transactionViewModel)
         {
-            if (Transaction != null)
+            if (TransactionByCategory != null)
             {
                 // Load categories and set the selected category
-                await transactionViewModel.LoadCategoriesAsync(Transaction.Category ?? new Category());
-                await transactionViewModel.LoadCategoriesAsync(Transaction.Category ?? new Category());
+                await transactionViewModel.LoadCategoriesAsync(TransactionByCategory.Category ?? new Category());
+                await transactionViewModel.LoadCategoriesAsync(TransactionByCategory.Category ?? new Category());
 
-                if (_categoryService != null && this.Transaction.CategoryId != null)
+                if (_categoryService != null && this.TransactionByCategory.CategoryId != null)
                 {
-                    var category = await _categoryService.GetCategoryByIdAsync(this.Transaction.CategoryId.Value);
+                    var category = await _categoryService.GetCategoryByIdAsync(this.TransactionByCategory.CategoryId.Value);
                     var matchedCategory = transactionViewModel.ListOfCategories
                         .FirstOrDefault(c => c.Id == category.Id);
 
@@ -83,11 +83,11 @@ public partial class TransactionPage : ContentPage
 
 
                 // Load categories and set the selected category
-                await transactionViewModel.LoadAccountsAsync(Transaction.Id);
+                await transactionViewModel.LoadAccountsAsync(TransactionByCategory.Id);
 
                 // Update other fields
                 transactionViewModel.TransactionText = "Edit Transaction";
-                transactionViewModel.Id = Transaction.Id;
+                transactionViewModel.Id = TransactionByCategory.Id;
                 transactionViewModel.SelectedType = Type;
 
                 //if (_categoryService != null && this.Transaction.CategoryId != null)
@@ -95,9 +95,9 @@ public partial class TransactionPage : ContentPage
                 //    var category = await _categoryService.GetCategoryByIdAsync(this.Transaction.CategoryId.Value);
                 //    transactionViewModel.SelectedCategory = category;
                 //}
-                transactionViewModel.Amount = Transaction.Amount;
-                transactionViewModel.Reason = Transaction.Reason ?? string.Empty;   
-                transactionViewModel.Date = Transaction.Date;
+                transactionViewModel.Amount = TransactionByCategory.Amount;
+                transactionViewModel.Reason = TransactionByCategory.Reason ?? string.Empty;   
+                transactionViewModel.Date = TransactionByCategory.TransactionDate;
             }
             else
             {

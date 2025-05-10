@@ -8,6 +8,9 @@ namespace TrakiLibrary.Models
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
+        [ForeignKey(typeof(Account))]
+        public int? SourceAccountId { get; set; } // Foreign key linking to Account
+
         [ForeignKey(typeof(Category))]
         public int? CategoryId { get; set; }
 

@@ -5,7 +5,8 @@ namespace Core.Shared
 {
     public class TransactionFilterRequest
     {
-        public List<Transaction>? Transactions{ get; set; }
+        public List<TransactionByCategory>? TransactionByCategorys { get; set; }
+        public List<TransactionByAccount>? TransactionByAccounts { get; set; }
         public FilterOption? FilterOption{ get; set; }
         public int AccountId { get; set; }
         public DateTime FromDate { get; set; }

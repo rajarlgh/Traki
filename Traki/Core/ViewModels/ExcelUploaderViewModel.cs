@@ -13,7 +13,6 @@ namespace Core.ViewModels
     {
 
         #region Private Variables
-        private readonly ITransactionService? _transactionService;
         private readonly IAccountService? _accountService;
         private readonly ICategoryService? _categoryService;
         private readonly ITransactionByCategoryService _trakiTransactionByCategoryService;
@@ -41,9 +40,8 @@ namespace Core.ViewModels
         #endregion Observable Property
 
         #region Constructor
-        public ExcelUploaderViewModel(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService, ITransactionByCategoryService trakiTransactionByCategoryService, ITransactionByAccountService transactionByAccountService)
+        public ExcelUploaderViewModel(IAccountService accountService, ICategoryService categoryService, ITransactionByCategoryService trakiTransactionByCategoryService, ITransactionByAccountService transactionByAccountService)
         {
-            _transactionService = transactionService;
             _accountService = accountService;
             _categoryService = categoryService;
             CanUpload = false; // Upload button is disabled initially
@@ -90,43 +88,31 @@ namespace Core.ViewModels
                 UploadStatus = "Reading file...";
                 UploadProgress = 0;
 
-                var transactions = await Task.Run(() => ReadCsv(SelectedFilePath));
+                await Task.Run(() => ReadCsv(SelectedFilePath));
 
-                int total = transactions.Count;
-                int batchSize = 100; // Set batch size to process records in smaller groups
-                int batchCount = (total + batchSize - 1) / batchSize; // Calculate the number of batches
-                int index = 0;
+                int total = transactionByCategorys.Count + transactionByAccounts.Count;
+                int batchSize = 100;
 
-                foreach (var transaction in transactionByCategorys)
-                {
-                    _trakiTransactionByCategoryService.AddTransactionAsync(transaction);
-                }
+                await ProcessInBatchesAsync(
+                    transactionByCategorys,
+                    batchSize,
+                    transaction => _trakiTransactionByCategoryService.AddTransactionAsync(transaction),
+                    processed => {
+                        UploadProgress = (double)processed / total;
+                        UploadStatus = $"Uploading categories... {processed} of {total}";
+                    },
+                    total);
 
-                foreach (var transaction in transactionByAccounts)
-                {
-                    _trakiTransactionByAccountService.AddTransactionAsync(transaction);
-                }
+                await ProcessInBatchesAsync(
+                    transactionByAccounts,
+                    batchSize,
+                    transaction => _trakiTransactionByAccountService.AddTransactionAsync(transaction),
+                    processed => {
+                        UploadProgress = (double)processed / total;
+                        UploadStatus = $"Uploading accounts... {processed} of {total}";
+                    },
+                    total);
 
-                // Process transactions in batches
-                for (int i = 0; i < batchCount; i++)
-                {
-                    var batch = transactions.Skip(i * batchSize).Take(batchSize).ToList();
-                    var batchTasks = new List<Task>();
-
-                    foreach (var transaction in batch)
-                    {
-                        if (_transactionService != null)
-                            batchTasks.Add(_transactionService.AddTransactionAsync(transaction));
-                    }
-
-                    // Await all tasks in the current batch concurrently
-                    await Task.WhenAll(batchTasks);
-
-                    // Update progress after each batch
-                    index += batch.Count;
-                    UploadProgress = (double)index / total;
-                    UploadStatus = $"Uploading... {index} of {total}";
-                }
 
                 UploadStatus = "Upload completed!";
             }
@@ -140,6 +126,30 @@ namespace Core.ViewModels
                 IsUploading = false;
             }
         }
+
+        private async Task ProcessInBatchesAsync<T>(
+            List<T> items,
+            int batchSize,
+            Func<T, Task> processItem,
+            Action<int> updateProgress,
+            int totalCount)
+        {
+            int processedCount = 0;
+            int totalBatches = (items.Count + batchSize - 1) / batchSize;
+
+            for (int i = 0; i < totalBatches; i++)
+            {
+                var batch = items.Skip(i * batchSize).Take(batchSize).ToList();
+
+                var tasks = batch.Select(item => processItem(item)).ToList();
+                await Task.WhenAll(tasks);
+
+                processedCount += batch.Count;
+                updateProgress(processedCount);
+            }
+        }
+
+
         #endregion Command
 
         #region Private Methods
@@ -156,11 +166,8 @@ namespace Core.ViewModels
         List<TransactionByCategory> transactionByCategorys = new List<TransactionByCategory>();
         List<TransactionByAccount> transactionByAccounts = new List<TransactionByAccount>();
 
-        private async Task<List<Transaction>> ReadCsv(string filePath)
+        private async Task ReadCsv(string filePath)
         {
-            var transactions = new List<Transaction>();
-            var rejectedTransactions = new List<Transaction>();
-
             if (!File.Exists(filePath))
                 throw new FileNotFoundException("File not found", filePath);
 
@@ -170,14 +177,14 @@ namespace Core.ViewModels
             };
 
             if (_accountService == null)
-                return transactions;
+                return;
 
             var existingAccounts = (await _accountService.GetAccountsAsync())
                 .Where(a => !string.IsNullOrEmpty(a.Name)) // filter out invalid accounts
                 .ToDictionary(a => a.Name!, a => a);        // '!' because after filter it's safe
 
             if (_categoryService == null)
-                return transactions;
+                return;
 
             var existingCategories = (await _categoryService.GetCategoriesAsync())
                 .Where(c => !string.IsNullOrEmpty(c.Name))
@@ -248,31 +255,31 @@ namespace Core.ViewModels
                     }
                 }
 
-                bool isRecordAlreadyExists = false;
-                if (categoryOrTransferInfo != null && categoryOrTransferInfo.Contains("From '") && accountName != null)
-                {
-                    string transferAccountNamePart = categoryOrTransferInfo.Replace("From '", "");
-                    var transferAccountName = transferAccountNamePart.Substring(0, transferAccountNamePart.Length - 1);
-                    var sourceAccount = await _accountService.GetAccountByAccountNameAsync(transferAccountName);
+                //bool isRecordAlreadyExists = false;
+                //if (categoryOrTransferInfo != null && categoryOrTransferInfo.Contains("From '") && accountName != null)
+                //{
+                //    string transferAccountNamePart = categoryOrTransferInfo.Replace("From '", "");
+                //    var transferAccountName = transferAccountNamePart.Substring(0, transferAccountNamePart.Length - 1);
+                //    var sourceAccount = await _accountService.GetAccountByAccountNameAsync(transferAccountName);
 
-                    var destinationAccount = await _accountService.GetAccountByAccountNameAsync(accountName);
+                //    var destinationAccount = await _accountService.GetAccountByAccountNameAsync(accountName);
 
-                    if (_transactionService != null && sourceAccount != null && destinationAccount != null)
-                    {
-                        var existingTransactions = await _transactionService.GetTransactionsAsync();
-                        var matchingExistingTransactions = existingTransactions
-                            .Where(t => t.FromAccountId == sourceAccount.Id && t.ToAccountId == destinationAccount.Id);
+                //    if (_transactionService != null && sourceAccount != null && destinationAccount != null)
+                //    {
+                //        var existingTransactions = await _transactionService.GetTransactionsAsync();
+                //        var matchingExistingTransactions = existingTransactions
+                //            .Where(t => t.FromAccountId == sourceAccount.Id && t.ToAccountId == destinationAccount.Id);
 
-                        if (matchingExistingTransactions.Any())
-                            isRecordAlreadyExists = true;
+                //        if (matchingExistingTransactions.Any())
+                //            isRecordAlreadyExists = true;
 
-                        var matchingNewTransactions = transactions
-                            .Where(t => t.FromAccountId == sourceAccount.Id && t.ToAccountId == destinationAccount.Id);
+                //        var matchingNewTransactions = transactions
+                //            .Where(t => t.FromAccountId == sourceAccount.Id && t.ToAccountId == destinationAccount.Id);
 
-                        if (matchingNewTransactions.Any())
-                            isRecordAlreadyExists = true;
-                    }
-                }
+                //        if (matchingNewTransactions.Any())
+                //            isRecordAlreadyExists = true;
+                //    }
+                //}
 
                 if (transferredAccount != null)
                 {
@@ -293,6 +300,7 @@ namespace Core.ViewModels
                 {
                     var transactionByCategory = new TransactionByCategory
                     {
+                        SourceAccountId = account?.Id ?? 0,
                         CategoryId = category?.Id ?? 0,
                         TransactionDate = transactionDate,
                         Amount = amountValue,
@@ -302,30 +310,8 @@ namespace Core.ViewModels
                     };
                     transactionByCategorys.Add(transactionByCategory);
                 }
-
-                    var transaction = new Transaction
-                    {
-                        FromAccountId = account?.Id ?? 0,
-                        ToAccountId = transferredAccount?.Id,
-                        Category = category,
-                        CategoryId = category?.Id,
-                        Date = transactionDate,
-                        Amount = amountValue,
-                        Type = amountValue > 0 ? "Income" : "Expense",
-                        Reason = description
-                    };
-
-                if (!isRecordAlreadyExists)
-                {
-                    transactions.Add(transaction);
-                }
-                else
-                {
-                    rejectedTransactions.Add(transaction);
-                }
             }
 
-            return transactions;
         }
 
 

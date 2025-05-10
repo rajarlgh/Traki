@@ -25,7 +25,6 @@ namespace Traki.Droid
             });
 
             RegisterService<IAccountService, AccountService>(builder, dbPath);
-            RegisterService<ITransactionService, TransactionService>(builder, dbPath);
             RegisterService<ICategoryService, CategoryService>(builder, dbPath);
             RegisterService<ITransactionByCategoryService, TransactionByCategoryService>(builder, dbPath);
             RegisterService<ITransactionByAccountService, TransactionByAccountService>(builder, dbPath);
@@ -92,10 +91,10 @@ namespace Traki.Droid
                 {
                     // Get required services
                     var accountService = provider.GetRequiredService<IAccountService>();
-                    var transactionService = provider.GetRequiredService<ITransactionService>();
+                    //var transactionService = provider.GetRequiredService<ITransactionService>();
                     // Create the ViewModel instance with dbPath and accountService
                     //return (TViewModel)Activator.CreateInstance(typeof(TViewModel), dbPath, accountService);
-                    var instance = Activator.CreateInstance(typeof(TViewModel), dbPath, accountService, transactionService)
+                    var instance = Activator.CreateInstance(typeof(TViewModel), dbPath, accountService)
     ?? throw new InvalidOperationException($"Could not create an instance of {typeof(TViewModel)}.");
                     return (TViewModel)instance;
 

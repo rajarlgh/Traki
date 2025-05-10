@@ -12,32 +12,32 @@ namespace Core.ViewModels
     {
         #region Private Variables
         private ICategoryService? _categoryService;
-        private ITransactionService? _transactionService;
+        private ITransactionByCategoryService? _transactionByCategoryService;
         #endregion Private Variables
 
         #region Property
 #pragma warning disable
         [ObservableProperty]
-        private ObservableCollection<Transaction>? selectedCategoryBreakdown;
+        private ObservableCollection<TransactionByCategory>? selectedCategoryBreakdown;
 #pragma warning restore
 
         #endregion Property
 
         #region Constructor
-        public DetailedTransactionsViewModel(ICategoryService categoryService, ITransactionService? transactionService)
+        public DetailedTransactionsViewModel(ICategoryService categoryService, ITransactionByCategoryService? transactionService)
         {
             _categoryService = categoryService;
-            _transactionService = transactionService;
+            _transactionByCategoryService = transactionService;
         }
         #endregion Constructor
 
         #region Public Methods
         public async void ShowBreakdownForCategory(int? categoryId, TransactionType type)
         {
-            if (_categoryService != null && categoryId != null && _transactionService != null)
+            if (_categoryService != null && categoryId != null && _transactionByCategoryService != null)
             {
                 var category = await _categoryService.GetCategoryByIdAsync(categoryId.Value);
-                var listOfTransactions =await _transactionService.GetTransactionsByCategoryIdAsync(categoryId.Value);
+                var listOfTransactions =await _transactionByCategoryService.GetTransactionsByCategoryIdAsync(categoryId.Value);
                 //var categoryId = category.Id;
 
                 var breakdown = listOfTransactions?
@@ -48,7 +48,7 @@ namespace Core.ViewModels
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     if (breakdown != null)
-                        SelectedCategoryBreakdown = new ObservableCollection<Transaction>(breakdown);
+                        SelectedCategoryBreakdown = new ObservableCollection<TransactionByCategory>(breakdown);
                 });
 
             }
@@ -57,7 +57,7 @@ namespace Core.ViewModels
 
         #region Commands
         [RelayCommand]
-        public async Task EditTransactionDetailsAsync(Transaction transaction)
+        public async Task EditTransactionDetailsAsync(TransactionByCategory transaction)
         {
             // Pass the TransactionViewModel to the transaction page
             await Shell.Current.GoToAsync($"{nameof(TransactionPage)}?type={transaction.Type}", true, new Dictionary<string, object>

@@ -15,7 +15,8 @@ namespace Core.ViewModels
     public partial class IncomeViewModel : TransactionBase, IRecipient<FilterChangedMessage>
     {
         #region Private Variables
-        private readonly ITransactionService? _transactionService;
+        private readonly ITransactionByCategoryService? _transactionByCategoryService;
+        private readonly ITransactionByAccountService? _transactionByAccountService;
         private readonly ICategoryService? _categoryService;
         private readonly IAccountService? _accountService;
         #endregion Private Variables
@@ -30,10 +31,11 @@ namespace Core.ViewModels
 
         #region Public Constructor
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public IncomeViewModel(ITransactionService? transactionService, ICategoryService? categoryService, IAccountService accountService)
+        public IncomeViewModel(ITransactionByCategoryService? transactionByCategoryService, ITransactionByAccountService? transactionByAccountService,  ICategoryService? categoryService, IAccountService accountService)
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         {
-            _transactionService = transactionService;
+            _transactionByCategoryService = transactionByCategoryService;
+            _transactionByAccountService = transactionByAccountService;
             _categoryService = categoryService;
             _accountService = accountService;
             StrongReferenceMessenger.Default.Register(this);
@@ -170,15 +172,26 @@ namespace Core.ViewModels
         private async void FilterTransactionsByRange(DateTime fromDate, DateTime toDate, int accountId, FilterOption? filterOption)
         {
 
-            if (_transactionService == null)
+            if (_transactionByCategoryService == null)
                 throw new InvalidOperationException("Transaction service is not initialized.");
 
-            var transactions = await _transactionService.GetTransactionsAsync();
+            var transactionByCategorys = await _transactionByCategoryService.GetTransactionsAsync();
 
-            if (transactions == null)
+            if (transactionByCategorys == null)
             {
                 return;
             }
+
+            if (_transactionByAccountService == null)
+                throw new InvalidOperationException("Transaction service is not initialized.");
+
+            var transactionByAccounts = await _transactionByAccountService.GetTransactionsAsync();
+
+            //if (transactionByAccounts == null)
+            //{
+            //    return;
+            //}
+
             if (_categoryService == null)
                 throw new InvalidOperationException("Category service is not initialized.");
 
@@ -190,7 +203,8 @@ namespace Core.ViewModels
 
             var accountDetails = new TransactionFilterRequest() 
             { 
-                Transactions = transactions, 
+                TransactionByCategorys = transactionByCategorys, 
+                TransactionByAccounts = transactionByAccounts,
                 FilterOption=filterOption,
                 AccountId=accountId,
                 FromDate=fromDate,

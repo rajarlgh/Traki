@@ -112,11 +112,11 @@ namespace Traki.ViewModels
         #region Private Methods
         private void CalculateBalances(TransactionFilterRequest accountDetails)
         {
-            var _transactions = accountDetails.Transactions;
+            var _transactions = accountDetails.TransactionByCategorys;
             if (_transactions != null)
             {
-                var totalIncome = _transactions.Where(t => t.Type == "Income" && t.Date >= accountDetails.FromDate && t.Date <= accountDetails.ToDate).Sum(t => t.Amount);
-                var totalExpenses = _transactions.Where(t => t.Type == "Expense" && t.Date >= accountDetails.FromDate && t.Date <= accountDetails.ToDate).Sum(t => t.Amount);
+                var totalIncome = _transactions.Where(t => t.Type == "Income" && t.TransactionDate >= accountDetails.FromDate && t.TransactionDate <= accountDetails.ToDate).Sum(t => t.Amount);
+                var totalExpenses = _transactions.Where(t => t.Type == "Expense" && t.TransactionDate >= accountDetails.FromDate && t.TransactionDate <= accountDetails.ToDate).Sum(t => t.Amount);
 
                 this.Balance = totalIncome + totalExpenses;
             }

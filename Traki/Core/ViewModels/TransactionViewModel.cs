@@ -12,15 +12,15 @@ namespace Core.ViewModels
         #region Private Variables
         private readonly ICategoryService? _categoryService;
         private readonly IAccountService? _accountService;
-        private readonly ITransactionService? _transactionService;
+        private readonly ITransactionByCategoryService? _transactionByCategoryService;
         #endregion Private Variables
 
         #region Constructors
-        public TransactionViewModel(ICategoryService? categoryService, IAccountService? accountService, ITransactionService? transactionService )
+        public TransactionViewModel(ICategoryService? categoryService, IAccountService? accountService, ITransactionByCategoryService? transactionByCategoryService )
         {
             this._categoryService = categoryService;
             this._accountService = accountService;
-            this._transactionService = transactionService;
+            this._transactionByCategoryService = transactionByCategoryService;
         }
         #endregion Constructors
 #pragma warning disable
@@ -109,26 +109,29 @@ namespace Core.ViewModels
         [RelayCommand]
         public async Task AddTransactionAsync()
         {
-            var transaction = new Transaction
+            var transactionByCategory = new TransactionByCategory
             {
-                Id = Id,
+                Id = Id??0,
                 Amount = Amount,
                 Reason = Reason,
                 Type = this.SelectedType.ToString(),
                 Category = SelectedCategory,
-                FromAccountId = SelectedAccount?.Id ?? 0,
-                Date = DateTime.Now
+                SourceAccountId = SelectedAccount?.Id ?? 0,
+                TransactionDate = DateTime.Now
             };
 
             try
             {
-                if (transaction.Id == null || transaction.Id == 0)
-                    await _transactionService.AddTransactionAsync(transaction);
-                else
-                    await _transactionService.UpdateTransactionAsync(transaction);
+                if (_transactionByCategoryService != null)
+                {
+                    if (transactionByCategory == null || transactionByCategory.Id == 0)
+                        await _transactionByCategoryService.AddTransactionAsync(transactionByCategory);
+                    else
+                        await _transactionByCategoryService.UpdateTransactionAsync(transactionByCategory);
 
-                ResetTransactionForm();
-                await Application.Current.MainPage.DisplayAlert("Success", "Transaction saved successfully.", "OK");
+                    ResetTransactionForm();
+                    await Application.Current.MainPage.DisplayAlert("Success", "Transaction saved successfully.", "OK");
+                }
             }
             catch (Exception ex)
             {
