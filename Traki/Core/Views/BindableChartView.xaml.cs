@@ -51,12 +51,12 @@ public partial class BindableChartView : ContentView
         float strokeWidth = 50f;
         float radius = Math.Min(centerX, centerY) - (strokeWidth / 2) - 10; // adjust radius for stroke width
 
-        float startAngle = -90f;
-        float total = _entriesCache.Sum(entry => entry.Value);
+        decimal startAngle = -90m;
+        decimal total = _entriesCache.Sum(entry => entry.Value);
 
         foreach (var entry in _entriesCache)
         {
-            float sweepAngle = (entry.Value / total) * 360f;
+            decimal sweepAngle = (entry.Value / total) * 360m;
 
             using var paint = new SKPaint
             {
@@ -67,7 +67,7 @@ public partial class BindableChartView : ContentView
             };
 
             var rect = new SKRect(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
-            canvas.DrawArc(rect, startAngle, sweepAngle, false, paint);
+            canvas.DrawArc(rect, (float) startAngle, (float) sweepAngle, false, paint);
 
             startAngle += sweepAngle;
         }

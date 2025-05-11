@@ -293,6 +293,7 @@ namespace Core.ViewModels
                         Reason = description,
                         FromAccount = account,
                         ToAccount = transferredAccount,
+                        CreatedBy = "Upload"
                     };
                     transactionByAccounts.Add(transactionByAccount);
                 }
@@ -307,6 +308,7 @@ namespace Core.ViewModels
                         Type = amountValue > 0 ? TransactionType.Income.ToString() : TransactionType.Expense.ToString(),
                         Reason = description,
                         Category = category,
+                        CreatedBy = "Upload"
                     };
                     transactionByCategorys.Add(transactionByCategory);
                 }

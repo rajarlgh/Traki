@@ -103,6 +103,7 @@ namespace Core.Shared
                         return new AggregatedTransaction
                         {
                             Id = g.Key,
+                            NumberOfRecords = g.Count(),
                             Name = accountName,
                             TotalAmount = g.Sum(t => t.Amount * -1) // Subtract for sender
                         };
@@ -128,6 +129,7 @@ namespace Core.Shared
                               return new AggregatedTransaction
                               {
                                   Id = g.Key,
+                                  NumberOfRecords = g.Count(),
                                   Name = accountName,
                                   TotalAmount = g.Sum(t => t.Amount) // Add for receiver
                               };
@@ -158,6 +160,7 @@ namespace Core.Shared
                         return new AggregatedTransaction
                         {
                             Id = g.Key,
+                            NumberOfRecords = g.Count(),
                             Name = categoryName,
                             TotalAmount = g.Sum(t => t.Amount)
                         };
@@ -174,9 +177,9 @@ namespace Core.Shared
 
                 result = merged.Select(data => new ChartEntryWrapper
                 {
-                    Label = data.Name,
-                    ValueLabel = data.TotalAmount.ToString("F0"),
-                    Value = (float)data.TotalAmount,
+                    Label = data.Name + " (" + data.NumberOfRecords + ")",
+                    ValueLabel = data.TotalAmount.ToString(),
+                    Value = (decimal)data.TotalAmount,
                     Color = this.GetCategoryColor(data.Name ?? string.Empty),
                     CategoryId = data.Id
                 }).ToList();
@@ -190,6 +193,7 @@ namespace Core.Shared
         public int? Id { get; set; }
         public required string Name { get; set; }
         public decimal TotalAmount { get; set; }
+        public int NumberOfRecords { get; set; }
     }
 
 }
