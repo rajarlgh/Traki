@@ -88,19 +88,8 @@ namespace Core.Shared
             {
                 IEnumerable<AggregatedTransaction> outgoing = Enumerable.Empty<AggregatedTransaction>();
 
-                if (transactionType == TransactionType.Expense)
+                if (transactionType == TransactionType.Expense && selectedAccountId != -1)
                 {
-                    //foreach (var t in filteredTransactionByCategorys)
-                    //{
-                    //    if (t.Type == TransactionType.Income.ToString()
-                    //        && (selectedAccountId == -1? true: t.FromAccountId == selectedAccountId)
-                    //        && t.FromAccountId > 0
-                    //        && t.ToAccountId > 0)
-                    //    {
-                    //        t.Type = TransactionType.Expense.ToString(); // Correct it
-                    //    }
-                    //}
-
                     // Scenario 1: Outgoing transactions (act as Expense for selected account)
                     // Get all records which transfer the amount from one account to another account. (Expenses)
                     outgoing = transactionsByAccounts
@@ -122,35 +111,36 @@ namespace Core.Shared
                 }
                 IEnumerable<AggregatedTransaction> incoming = Enumerable.Empty<AggregatedTransaction>();
 
-                //if (transactionType == TransactionType.Income)
-                //{
-                //    // Scenario 2: Incoming transactions (act as Income for selected account)
-                //  incoming = filteredTransactionByCategorys
-                //        .Where(t => t.Type == transactionType.ToString()
-                //                    && (selectedAccountId == -1 ? true : t.SourceAccountId == selectedAccountId)
-                //                    //&& t.FromAccountId > 0
-                //                    //&& t.ToAccountId > 0
-                //                    )
-                //        .GroupBy(t => t.SourceAccountId)
-                //        .Select(g =>
-                //        {
-                //            var accountName = accounts?.FirstOrDefault(a => a.Id == g.Key)?.Name;
-                //            return new AggregatedTransaction
-                //            {
-                //                Id = g.Key,
-                //                Name = accountName,
-                //                TotalAmount = g.Sum(t => t.Amount) // Add for receiver
-                //            };
-                //        });
-                //    var t2 = incoming.ToList();
-                //}
-                //var t4 = filteredTransactionByCategorys
-                //.Where(t =>
-                //    (selectedAccountId == -1 || t.SourceAccountId == selectedAccountId) &&
-                //    t.Type == transactionType.ToString() &&
-                //    t.CategoryId != null
-                //)
-                //.ToList();
+                if (transactionType == TransactionType.Income && selectedAccountId != -1)
+                {
+                    // Scenario 2: Incoming transactions (act as Income for selected account)
+                    incoming = transactionsByAccounts
+                          .Where(t => t.Type == transactionType.ToString()
+                                      && (selectedAccountId == -1 ? true : t.DestinationAccountId == selectedAccountId)
+                                      
+                                      //&& t.FromAccountId > 0
+                                      //&& t.ToAccountId > 0
+                                      )
+                          .GroupBy(t => t.SourceAccountId)
+                          .Select(g =>
+                          {
+                              var accountName = accounts?.FirstOrDefault(a => a.Id == g.Key)?.Name;
+                              return new AggregatedTransaction
+                              {
+                                  Id = g.Key,
+                                  Name = accountName,
+                                  TotalAmount = g.Sum(t => t.Amount) // Add for receiver
+                              };
+                          });
+                    var t2 = incoming.ToList();
+                }
+                var t4 = filteredTransactionByCategorys
+                .Where(t =>
+                    (selectedAccountId == -1 || t.SourceAccountId == selectedAccountId) &&
+                    t.Type == transactionType.ToString() &&
+                    t.CategoryId != null
+                )
+                .ToList();
 
                 //var vt = t4.ToList();
 
