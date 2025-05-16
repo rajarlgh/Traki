@@ -7,46 +7,40 @@
 
     <ContentView.ControlTemplate>
         <ControlTemplate>
-            <Border Padding="5" Margin="10" StrokeThickness="1" BackgroundColor="Transparent">
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gold}}"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#222222}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
                 <Border.Shadow>
-                    <Shadow Brush="Black" Opacity=".1" Offset="2,2"/>
+                    <Shadow Brush="{AppThemeBinding Light=#333333, Dark=#000000}" 
+                            Opacity="0.15" Offset="3,3" Radius="6" />
                 </Border.Shadow>
+
                 <VerticalStackLayout Spacing="0">
 
                     <!-- Title Bar -->
-                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource LightGold}}" Padding="10,15">
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource DarkGold}}" Padding="12,18">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="0"/>
+                            <RoundRectangle CornerRadius="10,10,0,0" />
                         </Border.StrokeShape>
-                        <Border.Background>
-                            <LinearGradientBrush>
-                                <GradientStop Color="{AppThemeBinding Light=White, Dark=Gold}" Offset="0.0" />
-                                <GradientStop Color="{AppThemeBinding Light={StaticResource Gray300}, Dark=DarkGoldenrod}" Offset="1.0" />
-                            </LinearGradientBrush>
-                        </Border.Background>
+
                         <Label Text="{TemplateBinding Title}" 
-                               FontSize="20"
-                               FontAttributes="Bold,Italic" 
+                               FontSize="22"
+                               FontAttributes="Bold" 
                                HorizontalTextAlignment="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource OffBlack}}"
-                               HorizontalOptions="Center"                                 
-                               VerticalTextAlignment="Center" />
+                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource OffWhite}}"
+                               AutomationProperties.Name="{TemplateBinding Title}" />
                     </Border>
 
-                    <!-- Scrollable Main Content Area -->
-                    <ScrollView>
-                        <Border Stroke="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gold}}"
-                                StrokeThickness="1"
-                                Margin="0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="5"/>
-                            </Border.StrokeShape>
-                            <ContentPresenter BindingContext="{Binding Source={RelativeSource TemplatedParent}}" 
-                                              BackgroundColor="Transparent"/>
-                        </Border>
-                    </ScrollView>
+                    <!-- Content Area -->
+                    <ContentPresenter BindingContext="{Binding Source={RelativeSource TemplatedParent}}" 
+                                      BackgroundColor="Transparent"
+                                      Margin="10" />
                 </VerticalStackLayout>
             </Border>
         </ControlTemplate>
     </ContentView.ControlTemplate>
+
 </ContentView>

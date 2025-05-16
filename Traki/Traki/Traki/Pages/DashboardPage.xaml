@@ -3,103 +3,86 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Traki.Pages.DashboardPage"
              xmlns:coreControls="clr-namespace:Core.Views;assembly=Core"
-             
-             Title="Dashboard Page">
+             Title="Dashboard">
 
-        <Grid RowDefinitions="Auto,*,Auto" Padding="10" RowSpacing="10">
+    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Padding="10" RowSpacing="10">
 
-            <!-- STICKY HEADER -->
-            <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="10">
-                <Button Text="Upload Pdf"
-                   
-                    Grid.Column="0" 
-                    WidthRequest="70" 
-                   HeightRequest="50" 
-                   CornerRadius="25"
-                   BorderColor="Orange"
-                   BorderWidth="7"
-                   BackgroundColor="Transparent"
-                   TextColor="Red"
+        <!-- HEADER -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="15">
+            <Button Text="Upload"
                     Command="{Binding UploadExcelCommand}"
                     Style="{StaticResource OutlineButtonStyle}"
-                    FontSize="10"
-                   
-                    />
+                    WidthRequest="80"
+                    CornerRadius="20"
+                    BorderColor="Orange"
+                    TextColor="Orange" />
 
             <Button Text="Download"
-                    Grid.Column="1" 
                     Command="{Binding DownloadExcelCommand}"
-                    FontSize="10"
                     Style="{StaticResource OutlineButtonStyle}"
+                    WidthRequest="100"
+                    CornerRadius="20"
                     BorderColor="Blue"
-                    BorderWidth="5"
-                    TextColor="Red"
-                    CornerRadius="25"
-                    WidthRequest="70"
-                    HeightRequest="50" />
+                    TextColor="Yellow"
+                    Grid.Column="1" />
 
             <Label Text="Balance:"
                    Grid.Column="2"
+                   FontSize="16"
                    FontAttributes="Bold"
-                   VerticalTextAlignment="Center"
                    HorizontalTextAlignment="End"
-                   FontSize="15" />
+                   VerticalTextAlignment="Center" />
 
             <Label Text="{Binding Balance}"
                    Grid.Column="3"
+                   FontSize="16"
                    FontAttributes="Bold"
-                   VerticalTextAlignment="Center"
-                   FontSize="15" />
+                   TextColor="Green"
+                   VerticalTextAlignment="Center" />
         </Grid>
 
+        <!-- Filter / Header -->
+        <VerticalStackLayout Grid.Row="1" Spacing="5">
+            <coreControls:SharedHeaderView x:Name="SharedHeaderControl" />
+        </VerticalStackLayout>
 
-        <!-- FIXED HEIGHT MIDDLE AREA WITH SCROLLING CONTENT ONLY -->
-        <Grid Grid.Row="1" RowDefinitions="Auto,*" ColumnDefinitions="*" >
-            <!-- Shared Header -->
-            <coreControls:SharedHeaderView Grid.Row="0" x:Name="SharedHeaderControl" />
+        <!-- Scrollable Dynamic Content -->
+        <ScrollView Grid.Row="2">
+            <ContentView Content="{Binding SelectedTabView}" />
+        </ScrollView>
 
-            <!-- Main Tab + Scrollable View -->
-            <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="15">
+        <!-- Tabs -->
+        <HorizontalStackLayout Grid.Row="3" HorizontalOptions="Center" Spacing="20" Padding="0,10">
+            <Button Text="Income"
+                    Command="{Binding ShowIncomeCommand}"
+                    BackgroundColor="LightGreen"
+                    TextColor="White"
+                    CornerRadius="20"
+                    WidthRequest="100" />
 
-                <!-- Tab Buttons -->
-                <HorizontalStackLayout Grid.Row="0" Spacing="10" HorizontalOptions="Center">
-                    <Button Text="Income" Command="{Binding ShowIncomeCommand}" />
-                    <Button Text="Expense" Command="{Binding ShowExpenseCommand}" />
-                </HorizontalStackLayout>
-
-                <!-- Scrollable Content -->
-                <ScrollView Grid.Row="1">
-                    <ContentView Content="{Binding SelectedTabView}" />
-                </ScrollView>
-            </Grid>
-        </Grid>        <!-- STICKY FOOTER -->
-        <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center">
-            <Grid ColumnDefinitions="Auto, *, Auto" Padding="20,0,20,0" ColumnSpacing="20">
-                <Button Text="Deposit"
-                        Grid.Column="0"
-                        Command="{Binding AddMoneyClickedCommand}"
-                        WidthRequest="100"
-                        HeightRequest="30"
-                        CornerRadius="50"
-                        BorderColor="Green"
-                        BorderWidth="7"
-                        BackgroundColor="Transparent"
-                        TextColor="Green"
-                        FontSize="15" />
-
-                <Button Text="Widthdraw"
-                        Grid.Column="2"
-                        Command="{Binding WidthDrawMoneyClickedCommand}"
-                        WidthRequest="100"
-                        HeightRequest="30"
-                        CornerRadius="50"
-                        BorderColor="Red"
-                        BorderWidth="7"
-                        BackgroundColor="Transparent"
-                        TextColor="Red"
-                        FontSize="15" />
-            </Grid>
+            <Button Text="Expense"
+                    Command="{Binding ShowExpenseCommand}"
+                    BackgroundColor="LightCoral"
+                    TextColor="White"
+                    CornerRadius="20"
+                    WidthRequest="100" />
         </HorizontalStackLayout>
 
+        <!-- Footer Buttons -->
+        <HorizontalStackLayout Grid.Row="4" Spacing="20" HorizontalOptions="Center">
+            <Button Text="Deposit"
+                    Command="{Binding AddMoneyClickedCommand}"
+                    WidthRequest="120"
+                    BackgroundColor="Green"
+                    TextColor="White"
+                    CornerRadius="20" />
+
+            <Button Text="Withdraw"
+                    Command="{Binding WidthDrawMoneyClickedCommand}"
+                    WidthRequest="120"
+                    BackgroundColor="Red"
+                    TextColor="White"
+                    CornerRadius="20" />
+        </HorizontalStackLayout>
     </Grid>
 </ContentPage>
