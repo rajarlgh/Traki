@@ -47,21 +47,21 @@
                             </Grid>
 
                             <!-- Month Filter -->
-                            <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto, Auto" IsVisible="{Binding IsMonthFilterSelected}"  RowSpacing="10" ColumnSpacing="10" >
+                            <HorizontalStackLayout Grid.Row="1" IsVisible="{Binding IsMonthFilterSelected}" >
                                 <Label Text="Select Month" Grid.Column="0" VerticalTextAlignment="Center"/>
                                 <Picker ItemsSource="{Binding Months}"
-         SelectedItem="{Binding SelectedMonth}"
-         Grid.Column="1" />
+                                         SelectedItem="{Binding SelectedMonth, Mode=TwoWay}"
+                                         Grid.Column="1" />
 
                                 <Label Text="Year" Grid.Column="2" VerticalTextAlignment="Center"/>
-                                <Picker ItemsSource="{Binding Years}"
-         SelectedItem="{Binding SelectedYear}"
-         Grid.Column="3" />
+                                <Picker  ItemsSource="{Binding Years}"
+                                         SelectedItem="{Binding SelectedYear, Mode=TwoWay}"
+                                         Grid.Column="3" />
 
-                                <Button Text="Go"
-         Grid.Column="4"
-         Command="{Binding FilterTransactionsCommand}" />
-                            </Grid>
+                                <Button  Text="Go"
+                                         Grid.Column="4"
+                                         Command="{Binding FilterTransactionsCommand}" />   
+                            </HorizontalStackLayout>
 
                             <!-- Year Filter -->
                             <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto" IsVisible="{Binding IsYearFilterSelected}"  RowSpacing="10" ColumnSpacing="10" >

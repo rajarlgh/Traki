@@ -1,12 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Core.Enum;
 using Core.Pages;
 using Core.Shared;
 using Core.Shared.Messages.Transactions;
 using Core.ViewModels;
 using Core.Views;
 using TrakiLibrary.Interfaces;
+using TrakiLibrary.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Traki.ViewModels
 {
@@ -14,7 +17,7 @@ namespace Traki.ViewModels
     {
         #region Private Variables
         private readonly IServiceProvider _serviceProvider;
-        
+
 #pragma warning disable
         [ObservableProperty]
         private View? selectedTabView;
@@ -25,13 +28,13 @@ namespace Traki.ViewModels
         #endregion Private Variables
 
         #region Constructor
-        public DashboardViewModel(IAccountService accountService, IServiceProvider serviceProvider   )
+        public DashboardViewModel(IAccountService accountService, IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             // Set default tab
             ShowIncome();
             //StrongReferenceMessenger.Default.Register(this);
-            StrongReferenceMessenger.Default.Register <AccountChangedMessage>(this);
+            StrongReferenceMessenger.Default.Register<AccountChangedMessage>(this);
 
             WeakReferenceMessenger.Default.Register<SelectedTransactionMessage>(this, (r, m) =>
             {
@@ -112,15 +115,42 @@ namespace Traki.ViewModels
         #region Private Methods
         private void CalculateBalances(TransactionFilterRequest accountDetails)
         {
-            var _transactions = accountDetails.TransactionByCategorys;
-            if (_transactions != null)
-            {
-                var totalIncome = _transactions.Where(t => t.Type == "Income" && t.TransactionDate >= accountDetails.FromDate && t.TransactionDate <= accountDetails.ToDate).Sum(t => t.Amount);
-                var totalExpenses = _transactions.Where(t => t.Type == "Expense" && t.TransactionDate >= accountDetails.FromDate && t.TransactionDate <= accountDetails.ToDate).Sum(t => t.Amount);
+            Chart c  = new Chart();
+            var (transactionsByCategorys, transactionsByAccounts) = c.FilterTransactions(accountDetails);
 
-                this.Balance = totalIncome + totalExpenses;
+            var selectedAccountId = accountDetails.AccountId;
+            var transactionCategory = transactionsByCategorys;
+            var transactionByAccounts = transactionsByAccounts;
+
+            if (transactionCategory != null)
+            {
+                var incomeOfTransactionCategory = transactionCategory
+                    .Where(t => t.Type == TransactionType.Income.ToString())
+                    .Sum(t => t.Amount);
+
+                var expenseOfTransactionCategory = transactionCategory
+                    .Where(t => t.Type == TransactionType.Expense.ToString())
+                    .Sum(t => t.Amount);
+
+                decimal incomeOfTransactionByAccount = 0;
+                decimal expenseOfTransactionByAccount = 0;
+
+                if (transactionByAccounts != null)
+                {
+                    incomeOfTransactionByAccount = transactionByAccounts
+                        .Where(t => t.Type == TransactionType.Income.ToString() && t.DestinationAccountId == selectedAccountId)
+                        .Sum(t => t.Amount);
+
+                    expenseOfTransactionByAccount = transactionByAccounts
+                        .Where(t => t.Type == TransactionType.Expense.ToString())
+                        .Sum(t => t.Amount);
+                }
+
+                this.Balance = incomeOfTransactionCategory + incomeOfTransactionByAccount +
+                               expenseOfTransactionCategory + expenseOfTransactionByAccount;
             }
         }
+
         #endregion Private Methods
     }
 }

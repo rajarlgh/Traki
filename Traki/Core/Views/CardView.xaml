@@ -4,15 +4,15 @@
              xmlns:controls="clr-namespace:Core.Views"
              x:Class="Core.Views.CardView"
              x:DataType="controls:CardView">
-    <!-- Set the x:DataType -->
 
     <ContentView.ControlTemplate>
         <ControlTemplate>
-            <Border Padding="5,5,5,5" Margin="10,10,10,10" StrokeThickness="1" BackgroundColor="Transparent">
+            <Border Padding="5" Margin="10" StrokeThickness="1" BackgroundColor="Transparent">
                 <Border.Shadow>
                     <Shadow Brush="Black" Opacity=".1" Offset="2,2"/>
                 </Border.Shadow>
-                <VerticalStackLayout>
+                <VerticalStackLayout Spacing="0">
+
                     <!-- Title Bar -->
                     <Border BackgroundColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource LightGold}}" Padding="10,15">
                         <Border.StrokeShape>
@@ -33,15 +33,18 @@
                                VerticalTextAlignment="Center" />
                     </Border>
 
-                    <!-- Main Content -->
-                    <Border Stroke="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gold}}"
-                            StrokeThickness="1">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="5"/>
-                        </Border.StrokeShape>
-                        <ContentPresenter BindingContext="{Binding Source={RelativeSource TemplatedParent}}" 
-                                          BackgroundColor="Transparent"/>
-                    </Border>
+                    <!-- Scrollable Main Content Area -->
+                    <ScrollView>
+                        <Border Stroke="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gold}}"
+                                StrokeThickness="1"
+                                Margin="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="5"/>
+                            </Border.StrokeShape>
+                            <ContentPresenter BindingContext="{Binding Source={RelativeSource TemplatedParent}}" 
+                                              BackgroundColor="Transparent"/>
+                        </Border>
+                    </ScrollView>
                 </VerticalStackLayout>
             </Border>
         </ControlTemplate>

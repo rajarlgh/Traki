@@ -5,11 +5,13 @@
              xmlns:coreControls="clr-namespace:Core.Views;assembly=Core"
              
              Title="Dashboard Page">
-    <VerticalStackLayout>
 
-        <!-- Header Section -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, Auto" Padding="10" ColumnSpacing="10">
-            <Button  Text="Upload Pdf"                   
+        <Grid RowDefinitions="Auto,*,Auto" Padding="10" RowSpacing="10">
+
+            <!-- STICKY HEADER -->
+            <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="10">
+                <Button Text="Upload Pdf"
+                   
                     Grid.Column="0" 
                     WidthRequest="70" 
                    HeightRequest="50" 
@@ -50,49 +52,54 @@
                    FontSize="15" />
         </Grid>
 
-        
-        <!-- Shared Header -->
-        <coreControls:SharedHeaderView x:Name="SharedHeaderControl"> </coreControls:SharedHeaderView >
 
-         <!--Tab Buttons--> 
-        <HorizontalStackLayout Padding="10" Spacing="10" HorizontalOptions="Center">
-            <Button Text="Income" Command="{Binding ShowIncomeCommand}" />
-            <Button Text="Expense" Command="{Binding ShowExpenseCommand}" />
-            <!--<Button Text="Transactions" Command="{Binding ShowTransactionsCommand}" />-->
-        </HorizontalStackLayout>
+        <!-- FIXED HEIGHT MIDDLE AREA WITH SCROLLING CONTENT ONLY -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" ColumnDefinitions="*" >
+            <!-- Shared Header -->
+            <coreControls:SharedHeaderView Grid.Row="0" x:Name="SharedHeaderControl" />
 
-        <!-- Tab Content Area -->
-        <ContentView Content="{Binding SelectedTabView}" />
+            <!-- Main Tab + Scrollable View -->
+            <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="15">
 
-        <!--Tab Buttons-->
-        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" >
-            <Grid ColumnDefinitions="Auto, *, Auto"  Padding="20,0,20,0" ColumnSpacing="20">
+                <!-- Tab Buttons -->
+                <HorizontalStackLayout Grid.Row="0" Spacing="10" HorizontalOptions="Center">
+                    <Button Text="Income" Command="{Binding ShowIncomeCommand}" />
+                    <Button Text="Expense" Command="{Binding ShowExpenseCommand}" />
+                </HorizontalStackLayout>
+
+                <!-- Scrollable Content -->
+                <ScrollView Grid.Row="1">
+                    <ContentView Content="{Binding SelectedTabView}" />
+                </ScrollView>
+            </Grid>
+        </Grid>        <!-- STICKY FOOTER -->
+        <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center">
+            <Grid ColumnDefinitions="Auto, *, Auto" Padding="20,0,20,0" ColumnSpacing="20">
                 <Button Text="Deposit"
-                     Grid.Column="0" 
-                    Command="{Binding AddMoneyClickedCommand}"
-                    WidthRequest="100"
-                    HeightRequest="30"
-                    CornerRadius="50"
-                    BorderColor="Green"
-                    BorderWidth="7"
-                    BackgroundColor="Transparent"
-                    TextColor="Green"
-                    FontSize="15" />
-
+                        Grid.Column="0"
+                        Command="{Binding AddMoneyClickedCommand}"
+                        WidthRequest="100"
+                        HeightRequest="30"
+                        CornerRadius="50"
+                        BorderColor="Green"
+                        BorderWidth="7"
+                        BackgroundColor="Transparent"
+                        TextColor="Green"
+                        FontSize="15" />
 
                 <Button Text="Widthdraw"
-                      Grid.Column="2" 
-                     Command="{Binding WidthDrawMoneyClickedCommand}"
-                     WidthRequest="100"
-                     HeightRequest="30"
-                     CornerRadius="50"
-                     BorderColor="Red"
-                     BorderWidth="7"
-                     BackgroundColor="Transparent"
-                     TextColor="Red"
-                     FontSize="15" />
+                        Grid.Column="2"
+                        Command="{Binding WidthDrawMoneyClickedCommand}"
+                        WidthRequest="100"
+                        HeightRequest="30"
+                        CornerRadius="50"
+                        BorderColor="Red"
+                        BorderWidth="7"
+                        BackgroundColor="Transparent"
+                        TextColor="Red"
+                        FontSize="15" />
             </Grid>
         </HorizontalStackLayout>
-        
-    </VerticalStackLayout>
+
+    </Grid>
 </ContentPage>

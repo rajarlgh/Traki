@@ -1,10 +1,7 @@
 ﻿using Core.Entity;
 using Core.Enum;
 using SkiaSharp;
-using System.Collections.Generic;
-using System.Linq;
 using TrakiLibrary.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Core.Shared
 {
@@ -43,52 +40,78 @@ namespace Core.Shared
             return _categoryColors[category];
         }
 
-        public List<ChartEntryWrapper> CreateChart(TransactionFilterRequest accountDetails, TransactionType transactionType)
+        public (List<TransactionByCategory> filteredCategories, List<TransactionByAccount> filteredAccounts)
+    FilterTransactions(TransactionFilterRequest request, TransactionType? type = null)
         {
-            var result = new List<ChartEntryWrapper>();
-            if (accountDetails == null)
-                return result;
+            var transactionsByCategorys = request.TransactionByCategorys ?? new List<TransactionByCategory>();
+            var transactionsByAccounts = request.TransactionByAccounts;
+            var selectedAccountId = request.AccountId;
+            var fromDate = request.FromDate;
+            var toDate = request.ToDate;
+            var filterOption = request.FilterOption;
 
-            var filterOption = accountDetails.FilterOption;
-            var transactionsByCategorys = accountDetails.TransactionByCategorys;
-                transactionsByCategorys = transactionsByCategorys?.Where(r => r.Type == transactionType.ToString()).ToList();
-            var transactionsByAccounts = accountDetails.TransactionByAccounts;
-                transactionsByAccounts = transactionsByAccounts?.Where(r => r.Type == transactionType.ToString()).ToList();
-            var selectedAccountId = accountDetails.AccountId;
-            var fromDate = accountDetails.FromDate;
-            var toDate = accountDetails.ToDate;
-            var categories = accountDetails.Categories;
-            var accounts = accountDetails.Accounts;
+            // Filter by type if specified
+            if (type != null)
+            {
+                transactionsByCategorys = transactionsByCategorys
+                    .Where(t => t.Type == type.ToString())
+                    .ToList();
+                transactionsByAccounts = transactionsByAccounts?
+                    .Where(t => t.Type == type.ToString())
+                    .ToList();
+            }
 
-
-            var filteredTransactionByCategorys = new List<TransactionByCategory>();
-
-            if (filterOption != FilterOption.All && transactionsByCategorys != null)
+            if (filterOption != FilterOption.All)
             {
                 if (selectedAccountId > 0)
                 {
-                    filteredTransactionByCategorys = transactionsByCategorys
+                    transactionsByCategorys = transactionsByCategorys
                         .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate &&
-                                   (t.SourceAccountId == selectedAccountId))
+                                    t.SourceAccountId == selectedAccountId)
                         .ToList();
+
+                    if (transactionsByAccounts != null)
+                    {
+                        transactionsByAccounts = transactionsByAccounts
+                            .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
+                            .ToList();
+                    }
                 }
                 else
                 {
-                    filteredTransactionByCategorys = transactionsByCategorys
+                    transactionsByCategorys = transactionsByCategorys
                         .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
                         .ToList();
+
+                    if (transactionsByAccounts != null)
+                    {
+                        transactionsByAccounts = transactionsByAccounts
+                            .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
+                            .ToList();
+                    }
                 }
             }
-            else
-            {
-                filteredTransactionByCategorys = transactionsByCategorys ?? new List<TransactionByCategory>();
-            }
 
-            if (filteredTransactionByCategorys.Any() && categories != null)
+            return (transactionsByCategorys, transactionsByAccounts ?? new List<TransactionByAccount>());
+        }
+
+
+        public List<ChartEntryWrapper> CreateChart(TransactionFilterRequest accountDetails, TransactionType transactionType)
+        {
+            var result = new List<ChartEntryWrapper>();
+            if (accountDetails == null) return result;
+
+            var (transactionsByCategorys, transactionsByAccounts) = FilterTransactions(accountDetails, transactionType);
+
+            var selectedAccountId = accountDetails.AccountId;
+            var categories = accountDetails.Categories;
+            var accounts = accountDetails.Accounts;
+
+            if (transactionsByCategorys.Any() && categories != null)
             {
                 IEnumerable<AggregatedTransaction> outgoing = Enumerable.Empty<AggregatedTransaction>();
 
-                if (transactionType == TransactionType.Expense && selectedAccountId != -1)
+                if (transactionType == TransactionType.Expense && selectedAccountId != -1 && transactionsByAccounts != null)
                 {
                     // Scenario 1: Outgoing transactions (act as Expense for selected account)
                     // Get all records which transfer the amount from one account to another account. (Expenses)
@@ -104,7 +127,7 @@ namespace Core.Shared
                         {
                             Id = g.Key,
                             NumberOfRecords = g.Count(),
-                            Name = accountName,
+                            Name = accountName ?? string.Empty,
                             TotalAmount = g.Sum(t => t.Amount * -1) // Subtract for sender
                         };
                     });
@@ -112,13 +135,13 @@ namespace Core.Shared
                 }
                 IEnumerable<AggregatedTransaction> incoming = Enumerable.Empty<AggregatedTransaction>();
 
-                if (transactionType == TransactionType.Income && selectedAccountId != -1)
+                if (transactionType == TransactionType.Income && selectedAccountId != -1 && transactionsByAccounts != null)
                 {
                     // Scenario 2: Incoming transactions (act as Income for selected account)
                     incoming = transactionsByAccounts
                           .Where(t => t.Type == transactionType.ToString()
                                       && (selectedAccountId == -1 ? true : t.DestinationAccountId == selectedAccountId)
-                                      
+
                                       //&& t.FromAccountId > 0
                                       //&& t.ToAccountId > 0
                                       )
@@ -130,13 +153,13 @@ namespace Core.Shared
                               {
                                   Id = g.Key,
                                   NumberOfRecords = g.Count(),
-                                  Name = accountName,
+                                  Name = accountName ?? string.Empty,
                                   TotalAmount = g.Sum(t => t.Amount) // Add for receiver
                               };
                           });
                     var t2 = incoming.ToList();
                 }
-                var t4 = filteredTransactionByCategorys
+                var t4 = transactionsByCategorys
                 .Where(t =>
                     (selectedAccountId == -1 || t.SourceAccountId == selectedAccountId) &&
                     t.Type == transactionType.ToString() &&
@@ -147,7 +170,7 @@ namespace Core.Shared
                 //var vt = t4.ToList();
 
                 // Group by Category as before (for non-transfer transactions)
-                var categoryGroups = filteredTransactionByCategorys
+                var categoryGroups = transactionsByCategorys
                     .Where(t =>
                     (selectedAccountId == -1 || t.SourceAccountId == selectedAccountId) &&
                     t.Type == transactionType.ToString() &&
@@ -161,7 +184,7 @@ namespace Core.Shared
                         {
                             Id = g.Key,
                             NumberOfRecords = g.Count(),
-                            Name = categoryName,
+                            Name = categoryName ?? string.Empty,
                             TotalAmount = g.Sum(t => t.Amount)
                         };
                     });
@@ -175,17 +198,21 @@ namespace Core.Shared
                     .Concat(incoming)
                     .ToList();
 
-                result = merged.Select(data => new ChartEntryWrapper
-                {
-                    Label = data.Name + " (" + data.NumberOfRecords + ")",
-                    ValueLabel = data.TotalAmount.ToString(),
-                    Value = (decimal)data.TotalAmount,
-                    Color = this.GetCategoryColor(data.Name ?? string.Empty),
-                    CategoryId = data.Id
-                }).ToList();
+                result = merged
+                    .OrderByDescending(data => (data.TotalAmount < 0 ? data.TotalAmount * -1 : data.TotalAmount))
+                    .Select(data => new ChartEntryWrapper
+                    {
+                        Label = data.Name + " (" + data.NumberOfRecords + ")",
+                        ValueLabel = data.TotalAmount.ToString(),
+                        Value = (decimal)data.TotalAmount,
+                        Color = this.GetCategoryColor(data.Name ?? string.Empty),
+                        CategoryId = data.Id
+                    }).ToList();
+
+                //StrongReferenceMessenger.Default.Send(new AccountChangedMessage((accountDetails)));
             }
 
-            return result;  
+            return result;
         }
     }
     public class AggregatedTransaction

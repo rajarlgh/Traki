@@ -3,6 +3,7 @@
              xmlns:views="clr-namespace:Core.Views"
              xmlns:converters="clr-namespace:Core.Converters"
              x:Class="Core.Views.IncomeView">
+
     <ContentView.Resources>
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
@@ -11,37 +12,36 @@
     </ContentView.Resources>
 
     <VerticalStackLayout>
-        <ScrollView Grid.Row="2" Padding="0,0,0,10">
-            <StackLayout Spacing="10">
+        <ScrollView Padding="0,0,0,10">
+            <VerticalStackLayout Spacing="10">
 
                 <views:CardView Title="Income">
                     <VerticalStackLayout>
+
                         <StackLayout>
                             <Button Text="{Binding IsExpanded, Converter={StaticResource BooleanToTextConverter}}"
                                     Command="{Binding ToggleFlagsCommand}" />
+
+                            <!-- Removed nested ScrollView -->
                             <ContentView IsVisible="{Binding IsExpanded}" MaximumHeightRequest="330">
-                                <ScrollView>
-                                    <Grid Padding="10">
-                                        <CollectionView x:Name="collectionViewIncome"
-                                                        ItemsSource="{Binding IncomeChartEntryWrappers}"
-                                                        SelectionMode="Single" 
-                                                        SelectionChanged="OnIncomeItemSelected">
-                                            <CollectionView.ItemsLayout>
-                                                <GridItemsLayout Orientation="Vertical" Span="1" />
-                                            </CollectionView.ItemsLayout>
-                                            <CollectionView.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Padding="10" Margin="5" BackgroundColor="Transparent">
-                                                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                                                            <Label Text="{Binding Label}" FontAttributes="Bold" Grid.Column="0" />
-                                                            <Label Text="{Binding ValueLabel}" FontSize="Small" Grid.Column="1" />
-                                                        </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </CollectionView.ItemTemplate>
-                                        </CollectionView>
-                                    </Grid>
-                                </ScrollView>
+                                <CollectionView x:Name="collectionViewIncome"
+                                                ItemsSource="{Binding IncomeChartEntryWrappers}"
+                                                SelectionMode="Single"
+                                                SelectionChanged="OnIncomeItemSelected">
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Vertical" Span="1" />
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="10" Margin="5" BackgroundColor="Transparent">
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                                    <Label Text="{Binding Label}" FontAttributes="Bold" Grid.Column="0" />
+                                                    <Label Text="{Binding ValueLabel}" FontSize="Small" Grid.Column="1" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
                             </ContentView>
                         </StackLayout>
 
@@ -53,11 +53,11 @@
                                                          WidthRequest="300" />
                             </Grid>
                         </StackLayout>
-                    </VerticalStackLayout>
 
+                    </VerticalStackLayout>
                 </views:CardView>
 
-            </StackLayout>
+            </VerticalStackLayout>
         </ScrollView>
     </VerticalStackLayout>
 </ContentView>
