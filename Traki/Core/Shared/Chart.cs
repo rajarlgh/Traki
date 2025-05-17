@@ -41,7 +41,7 @@ namespace Core.Shared
         }
 
         public (List<TransactionByCategory> filteredCategories, List<TransactionByAccount> filteredAccounts)
-    FilterTransactions(TransactionFilterRequest request, TransactionType? type = null)
+        FilterTransactions(TransactionFilterRequest request, TransactionType? type = null, bool isForCarryForward = false)
         {
             var transactionsByCategorys = request.TransactionByCategorys ?? new List<TransactionByCategory>();
             var transactionsByAccounts = request.TransactionByAccounts;
@@ -56,6 +56,7 @@ namespace Core.Shared
                 transactionsByCategorys = transactionsByCategorys
                     .Where(t => t.Type == type.ToString())
                     .ToList();
+
                 transactionsByAccounts = transactionsByAccounts?
                     .Where(t => t.Type == type.ToString())
                     .ToList();
@@ -65,29 +66,61 @@ namespace Core.Shared
             {
                 if (selectedAccountId > 0)
                 {
-                    transactionsByCategorys = transactionsByCategorys
-                        .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate &&
-                                    t.SourceAccountId == selectedAccountId)
-                        .ToList();
-
-                    if (transactionsByAccounts != null)
+                    if (isForCarryForward)
                     {
-                        transactionsByAccounts = transactionsByAccounts
-                            .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
+                        transactionsByCategorys = transactionsByCategorys
+                            .Where(t => t.TransactionDate < fromDate && t.SourceAccountId == selectedAccountId)
                             .ToList();
+
+                        if (transactionsByAccounts != null)
+                        {
+                            transactionsByAccounts = transactionsByAccounts
+                                .Where(t => t.TransactionDate < fromDate)
+                                .ToList();
+                        }
+                    }
+                    else
+                    {
+                        transactionsByCategorys = transactionsByCategorys
+                            .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate &&
+                                        t.SourceAccountId == selectedAccountId)
+                            .ToList();
+
+                        if (transactionsByAccounts != null)
+                        {
+                            transactionsByAccounts = transactionsByAccounts
+                                .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
+                                .ToList();
+                        }
                     }
                 }
                 else
                 {
-                    transactionsByCategorys = transactionsByCategorys
-                        .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
-                        .ToList();
-
-                    if (transactionsByAccounts != null)
+                    if (isForCarryForward)
                     {
-                        transactionsByAccounts = transactionsByAccounts
+                        transactionsByCategorys = transactionsByCategorys
+                            .Where(t => t.TransactionDate < fromDate)
+                            .ToList();
+
+                        if (transactionsByAccounts != null)
+                        {
+                            transactionsByAccounts = transactionsByAccounts
+                                .Where(t => t.TransactionDate < fromDate)
+                                .ToList();
+                        }
+                    }
+                    else
+                    {
+                        transactionsByCategorys = transactionsByCategorys
                             .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
                             .ToList();
+
+                        if (transactionsByAccounts != null)
+                        {
+                            transactionsByAccounts = transactionsByAccounts
+                                .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
+                                .ToList();
+                        }
                     }
                 }
             }

@@ -8,8 +8,6 @@ using Core.Shared.Messages.Transactions;
 using Core.ViewModels;
 using Core.Views;
 using TrakiLibrary.Interfaces;
-using TrakiLibrary.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Traki.ViewModels
 {
@@ -115,40 +113,86 @@ namespace Traki.ViewModels
         #region Private Methods
         private void CalculateBalances(TransactionFilterRequest accountDetails)
         {
-            Chart c  = new Chart();
-            var (transactionsByCategorys, transactionsByAccounts) = c.FilterTransactions(accountDetails);
+            Chart c = new Chart();
 
-            var selectedAccountId = accountDetails.AccountId;
-            var transactionCategory = transactionsByCategorys;
-            var transactionByAccounts = transactionsByAccounts;
+            // Step 1: Get balances from previous transactions (before FromDate)
+            var (carryForwardCategories, carryForwardAccounts) = c.FilterTransactions(accountDetails, null, isForCarryForward: true);
+            decimal carryForwardBalance = 0;
 
-            if (transactionCategory != null)
+            if (carryForwardCategories != null)
             {
-                var incomeOfTransactionCategory = transactionCategory
+                var t1 = carryForwardCategories
+                    .Where(t => t.Type == TransactionType.Income.ToString());
+                carryForwardBalance += carryForwardCategories
                     .Where(t => t.Type == TransactionType.Income.ToString())
                     .Sum(t => t.Amount);
 
-                var expenseOfTransactionCategory = transactionCategory
+                var t2 = carryForwardCategories
+                    .Where(t => t.Type == TransactionType.Expense.ToString());
+
+                carryForwardBalance += carryForwardCategories
                     .Where(t => t.Type == TransactionType.Expense.ToString())
                     .Sum(t => t.Amount);
-
-                decimal incomeOfTransactionByAccount = 0;
-                decimal expenseOfTransactionByAccount = 0;
-
-                if (transactionByAccounts != null)
-                {
-                    incomeOfTransactionByAccount = transactionByAccounts
-                        .Where(t => t.Type == TransactionType.Income.ToString() && t.DestinationAccountId == selectedAccountId)
-                        .Sum(t => t.Amount);
-
-                    expenseOfTransactionByAccount = transactionByAccounts
-                        .Where(t => t.Type == TransactionType.Expense.ToString())
-                        .Sum(t => t.Amount);
-                }
-
-                this.Balance = incomeOfTransactionCategory + incomeOfTransactionByAccount +
-                               expenseOfTransactionCategory + expenseOfTransactionByAccount;
             }
+
+            if (carryForwardAccounts != null)
+            {
+                var selectedAccountId = accountDetails.AccountId;
+                var t1
+                    = carryForwardAccounts
+                    .Where(t => t.Type == TransactionType.Income.ToString() && t.DestinationAccountId == selectedAccountId);
+
+
+                carryForwardBalance += carryForwardAccounts
+                    .Where(t => t.Type == TransactionType.Income.ToString() && t.DestinationAccountId == selectedAccountId)
+                    .Sum(t => t.Amount);
+
+                var t2
+                    = carryForwardAccounts
+                        .Where(t => t.Type == TransactionType.Expense.ToString() && t.SourceAccountId == selectedAccountId);
+
+                carryForwardBalance += carryForwardAccounts
+                    .Where(t => t.Type == TransactionType.Expense.ToString() && t.SourceAccountId == selectedAccountId)
+                    .Sum(t => t.Amount);
+            }
+
+            // Step 2: Get balances for the current month
+            var (currentCategories, currentAccounts) = c.FilterTransactions(accountDetails);
+            decimal currentBalance = 0;
+
+            if (currentCategories != null)
+            {
+                var t1 = currentCategories
+                    .Where(t => t.Type == TransactionType.Income.ToString());
+
+                currentBalance += currentCategories
+                    .Where(t => t.Type == TransactionType.Income.ToString())
+                    .Sum(t => t.Amount);
+                var t2 = currentCategories
+                    .Where(t => t.Type == TransactionType.Expense.ToString());
+                currentBalance += currentCategories
+                    .Where(t => t.Type == TransactionType.Expense.ToString())
+                    .Sum(t => t.Amount);
+            }
+
+            if (currentAccounts != null)
+            {
+                var selectedAccountId = accountDetails.AccountId;
+
+                var t1 = currentAccounts
+                    .Where(t => t.Type == TransactionType.Income.ToString() && t.DestinationAccountId == selectedAccountId);
+                currentBalance += currentAccounts
+                    .Where(t => t.Type == TransactionType.Income.ToString() && t.DestinationAccountId == selectedAccountId)
+                    .Sum(t => t.Amount);
+                var t2 = currentAccounts
+                    .Where(t => t.Type == TransactionType.Expense.ToString() && t.SourceAccountId == selectedAccountId);
+                currentBalance += currentAccounts
+                    .Where(t => t.Type == TransactionType.Expense.ToString() && t.SourceAccountId == selectedAccountId)
+                    .Sum(t => t.Amount);
+            }
+
+            // Step 3: Final balance = carry forward + current month
+            this.Balance = carryForwardBalance + currentBalance;
         }
 
         #endregion Private Methods

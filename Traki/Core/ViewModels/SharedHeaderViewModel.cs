@@ -4,12 +4,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using Core.Enum;
 using Core.Pages;
 using Core.Shared;
-using Core.Views;
-using Microsoft.Maui.ApplicationModel.Communication;
-using SQLite;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Transactions;
 using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
 
@@ -56,7 +52,7 @@ namespace Core.ViewModels
             Enumerable.Range(1, 52).Select(w => $"Week {w}").ToList());
 
         public ObservableCollection<int> Years { get; } = new(
-            Enumerable.Range(DateTime.Now.Year - 5, 11).ToList()); // 5 years back & forward
+            Enumerable.Range(DateTime.Now.Year - 10, 20).ToList()); // 10 years back & forward
         [ObservableProperty] private string selectedWeek = string.Empty;
         [ObservableProperty] private string selectedMonth = string.Empty;
         [ObservableProperty] private int selectedYear = 0;
