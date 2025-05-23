@@ -4,7 +4,6 @@ namespace TrakiLibrary.Interfaces
 {
     public interface IAccountService
     {
-        Task InitializeAsync();
         Task<List<Account>> GetAccountsAsync();
         Task<List<Account>?> GetAccountByAccountIdAsync(int id);
         Task<Account?> GetAccountByAccountNameAsync(string accountName);

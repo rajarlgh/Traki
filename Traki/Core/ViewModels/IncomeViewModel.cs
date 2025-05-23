@@ -38,7 +38,7 @@ namespace Core.ViewModels
             _transactionByAccountService = transactionByAccountService;
             _categoryService = categoryService;
             _accountService = accountService;
-            StrongReferenceMessenger.Default.Register(this);
+            WeakReferenceMessenger.Default.Register<FilterChangedMessage>(this);
 
         }
         #endregion Public Constructor
@@ -52,7 +52,7 @@ namespace Core.ViewModels
         }
         private void PublishAccountChanged(TransactionFilterRequest accountDetails)
         {
-            StrongReferenceMessenger.Default.Send(new AccountChangedMessage((accountDetails)));
+            WeakReferenceMessenger.Default.Send(new AccountChangedMessage((accountDetails)));
         }
         #endregion Public Methods
 

@@ -30,11 +30,6 @@ public partial class DashboardPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-
-        if (SharedHeaderControl.BindingContext is SharedHeaderViewModel vm)
-        {
-            vm.UnregisterMessenger();
-        }
     }
 
 }

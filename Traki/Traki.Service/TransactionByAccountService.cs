@@ -1,18 +1,16 @@
-﻿using SQLite;
-using TrakiLibrary.Interfaces;
+﻿using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
 
 namespace Traki.Service
 {
-    public class TransactionByAccountService : ITransactionByAccountService
+    public class TransactionByAccountService : BaseService, ITransactionByAccountService
     {
-        private readonly SQLiteAsyncConnection _database;
         private bool _isInitialized = false;
         private readonly SemaphoreSlim _initLock = new(1, 1);
 
-        public TransactionByAccountService(string dbPath)
+        public TransactionByAccountService(BudgetContextService budgetContextService) : base(budgetContextService)
         {
-            _database = new SQLiteAsyncConnection(dbPath);
+
         }
 
         public async Task<List<TransactionByAccount>> GetTransactionsAsync()
@@ -55,15 +53,20 @@ namespace Traki.Service
             return await _database.DeleteAsync<TransactionByAccount>(id);
         }
 
-        private async Task EnsureInitializedAsync()
+        protected async override Task? EnsureInitializedAsync()
         {
             if (_isInitialized) return;
 
             await _initLock.WaitAsync();
             try
             {
-                if (!_isInitialized)
+                var newDbPath = _budgetContextService.CurrentDbPath;
+
+                if (_currentDbPath != newDbPath || !_isInitialized)
                 {
+                    InitializeDatabase(newDbPath);
+                    _currentDbPath = newDbPath;
+
                     await _database.CreateTableAsync<TransactionByAccount>();
                     _isInitialized = true;
                 }

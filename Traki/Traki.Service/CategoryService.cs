@@ -1,22 +1,18 @@
-﻿using SQLite;
-using TrakiLibrary.Interfaces;
+﻿using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
 
 namespace Traki.Service
 {
-    public class CategoryService : ICategoryService
+    public class CategoryService : BaseService, ICategoryService
     {
-        #region Private Variables
-        private readonly SQLiteAsyncConnection _database;
         private bool _isInitialized = false;
-        private readonly SemaphoreSlim _initLock = new(1, 1); // Thread-safe initialization
-        #endregion Private Variables
+        private readonly SemaphoreSlim _initLock = new(1, 1);
 
-        #region public Methods
-        public async Task InitializeAsync()
+        public CategoryService(BudgetContextService budgetContextService) : base(budgetContextService)
         {
-            await _database.CreateTableAsync<Category>();
+ 
         }
+
         public async Task<List<Category>> GetCategoriesAsync()
         {
             await EnsureInitializedAsync();
@@ -26,64 +22,49 @@ namespace Traki.Service
         public async Task<Category?> GetCategoryByIdAsync(int id)
         {
             await EnsureInitializedAsync();
-            return await _database.Table<Category>()
-                                  .FirstOrDefaultAsync(c => c.Id == id);
+            return await _database.Table<Category>().FirstOrDefaultAsync(c => c.Id == id);
         }
+
         public async Task<Category> AddCategoryAsync(Category category)
         {
-            await EnsureInitializedAsync(); // Critical to prevent hanging
-            // Check if an account with the same name already exists
-            var existingCategory = _database.Table<Category>()
-                                                 .Where(a => a.Name == category.Name)
-                                                 .FirstOrDefaultAsync().Result;
+            await EnsureInitializedAsync();
+            var existingCategory = await _database.Table<Category>()
+                                                  .Where(a => a.Name == category.Name)
+                                                  .FirstOrDefaultAsync();
+
             if (existingCategory != null)
-            {
-                // Return the existing account with its ID
                 return existingCategory;
-            }
 
-            // Insert the new account
-            var t = _database.InsertAsync(category).Result;
-
-            // Return the newly created account with its generated ID
+            await _database.InsertAsync(category);
             return category;
         }
 
         public async Task DeleteCategoryAsync(int? id)
         {
-            await EnsureInitializedAsync(); // Critical to prevent hanging
-
+            await EnsureInitializedAsync();
             await _database.DeleteAsync<Category>(id);
         }
 
         public async Task UpdateCategoryAsync(Category category)
         {
-            await EnsureInitializedAsync(); // Critical to prevent hanging
-
+            await EnsureInitializedAsync();
             await _database.UpdateAsync(category);
         }
 
-        #endregion public Methods
-
-        #region Constructors
-        public CategoryService(string dbPath)
-        {
-            _database = new SQLiteAsyncConnection(dbPath);
-        }
-        #endregion Constructors
-
-
-
-        #region Private Methods
-        private async Task EnsureInitializedAsync()
+        protected async override Task? EnsureInitializedAsync()
         {
             if (_isInitialized) return;
 
             await _initLock.WaitAsync();
             try
             {
-                if (!_isInitialized)
+                var newDbPath = _budgetContextService.CurrentDbPath;
+
+                if (_currentDbPath != newDbPath || !_isInitialized)
                 {
+                    InitializeDatabase(newDbPath);
+                    _currentDbPath = newDbPath;
+
                     await _database.CreateTableAsync<Category>();
                     _isInitialized = true;
                 }
@@ -93,8 +74,5 @@ namespace Traki.Service
                 _initLock.Release();
             }
         }
-        #endregion Private Methods
-
-        
     }
 }

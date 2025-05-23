@@ -44,6 +44,17 @@
         <!-- Filter / Header -->
         <VerticalStackLayout Grid.Row="1" Spacing="5">
             <coreControls:SharedHeaderView x:Name="SharedHeaderControl" />
+            <VerticalStackLayout Padding="20" Spacing="10">
+                <Label Text="Select Budget" FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding AvailableBudgets}"
+                SelectedItem="{Binding SelectedBudget}"
+                Title="Choose a budget" />
+
+                <Button Text="Create New Budget"
+                Command="{Binding CreateNewBudgetCommand}" />
+
+                <!-- Your existing dashboard content below -->
+            </VerticalStackLayout>
         </VerticalStackLayout>
 
         <!-- Scrollable Dynamic Content -->

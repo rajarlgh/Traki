@@ -4,9 +4,11 @@ using CommunityToolkit.Mvvm.Messaging;
 using Core.Enum;
 using Core.Pages;
 using Core.Shared;
+using Core.Shared.Messages.Dashboard;
 using Core.Shared.Messages.Transactions;
 using Core.ViewModels;
 using Core.Views;
+using System.Collections.ObjectModel;
 using TrakiLibrary.Interfaces;
 
 namespace Traki.ViewModels
@@ -15,10 +17,12 @@ namespace Traki.ViewModels
     {
         #region Private Variables
         private readonly IServiceProvider _serviceProvider;
-
+        private readonly IBudgetContextService _budgetContextService;
+        private bool _isInitializing;
 #pragma warning disable
         [ObservableProperty]
         private View? selectedTabView;
+        public ObservableCollection<string> AvailableBudgets { get; } = new();
         [ObservableProperty]
         public decimal balance;
 #pragma warning restore
@@ -26,13 +30,14 @@ namespace Traki.ViewModels
         #endregion Private Variables
 
         #region Constructor
-        public DashboardViewModel(IAccountService accountService, IServiceProvider serviceProvider)
+        public DashboardViewModel(IAccountService accountService, IServiceProvider serviceProvider, IBudgetContextService budgetContextServicer)
         {
             _serviceProvider = serviceProvider;
+            _budgetContextService = budgetContextServicer;
             // Set default tab
             ShowIncome();
-            //StrongReferenceMessenger.Default.Register(this);
-            StrongReferenceMessenger.Default.Register<AccountChangedMessage>(this);
+            //WeakReferenceMessenger.Default.Register(this);
+            WeakReferenceMessenger.Default.Register<AccountChangedMessage>(this);
 
             WeakReferenceMessenger.Default.Register<SelectedTransactionMessage>(this, (r, m) =>
             {
@@ -43,10 +48,29 @@ namespace Traki.ViewModels
                 }
             });
 
+            _budgetContextService.BudgetChanged += OnBudgetChanged;
+
+            LoadAvailableBudgets();
+
+            // Optional: Set default budget
+            if (AvailableBudgets.Any())
+            {
+                SelectedBudget = AvailableBudgets.First();
+                _isInitializing = false;
+            }
+
         }
+
         #endregion Constructor
 
         #region Public Methods
+        private void PublishFilterChanged(bool flag)
+        {
+            WeakReferenceMessenger.Default.Send(new BudgetChangedMessage());
+            //WeakReferenceMessenger.Default.Send(new AccountChangedMessage(( new TransactionFilterRequest() )));
+            //WeakReferenceMessenger.Default.Send(new FilterChangedMessage((new FilterState())));
+
+        }
         public void Receive(AccountChangedMessage accountChangedMessage)
         {
             var accountDetails = accountChangedMessage.Value;
@@ -196,5 +220,66 @@ namespace Traki.ViewModels
         }
 
         #endregion Private Methods
+
+        #region Events
+        private void OnBudgetChanged()
+        {
+            // For example: refresh data, re-calculate balance, etc.
+        }
+
+        [ObservableProperty]
+        private string selectedBudget;
+        private void LoadAvailableBudgets()
+        {
+            _isInitializing = true;
+
+            var files = Directory.GetFiles(FileSystem.AppDataDirectory, "expenses_*.db");
+
+            foreach (var file in files)
+            {
+                var name = Path.GetFileNameWithoutExtension(file).Replace("expenses_", "");
+                AvailableBudgets.Add(name);
+            }
+            if (AvailableBudgets.Count == 0)
+                AvailableBudgets.Add("initial");
+        }
+
+
+        [RelayCommand]
+        private async Task CreateNewBudget()
+        {
+            var result = await Application.Current.MainPage.DisplayPromptAsync("New Budget", "Enter budget name:");
+            if (string.IsNullOrWhiteSpace(result)) return;
+
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, $"expenses_{result}.db");
+
+            if (!File.Exists(dbPath))
+            {
+                File.Create(dbPath).Close(); // Ensure file exists
+                AvailableBudgets.Add(result);
+                SelectedBudget = result;
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Exists", "Budget already exists.", "OK");
+            }
+            this.PublishFilterChanged(true);
+        }
+
+        partial void OnSelectedBudgetChanged(string value)
+        {
+            // Skip logic when setting the value programmatically
+            if (_isInitializing || value == null)
+                return;
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                var dbPath = Path.Combine(FileSystem.AppDataDirectory, $"expenses_{value}.db");
+                _budgetContextService.SetBudget(dbPath);
+                this.PublishFilterChanged(true);
+
+            }
+        }
+
+        #endregion
     }
 }

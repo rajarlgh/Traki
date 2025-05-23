@@ -1,13 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Core.Entity;
 using Core.Enum;
 using Core.Shared;
 using System.Collections.ObjectModel;
 using TrakiLibrary.Interfaces;
-using TrakiLibrary.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Core.ViewModels
 {
@@ -29,7 +26,7 @@ namespace Core.ViewModels
         #region Constructor
         public ExpenseViewModel(ICategoryService? _categoryService)
         {
-            StrongReferenceMessenger.Default.Register <AccountChangedMessage>(this);
+            WeakReferenceMessenger.Default.Register <AccountChangedMessage>(this);
         }
         #endregion Constructor
 

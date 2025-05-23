@@ -242,7 +242,7 @@ namespace Core.Shared
                         CategoryId = data.Id
                     }).ToList();
 
-                //StrongReferenceMessenger.Default.Send(new AccountChangedMessage((accountDetails)));
+                //WeakReferenceMessenger.Default.Send(new AccountChangedMessage((accountDetails)));
             }
 
             return result;

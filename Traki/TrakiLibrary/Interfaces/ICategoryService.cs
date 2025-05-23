@@ -4,7 +4,6 @@ namespace TrakiLibrary.Interfaces
 {
     public interface ICategoryService
     {
-        Task InitializeAsync();
 
         Task<List<Category>> GetCategoriesAsync();
         Task<Category?> GetCategoryByIdAsync(int id);

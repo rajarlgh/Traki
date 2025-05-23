@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Core.Enum;
 using Core.Pages;
 using Core.Shared;
+using Core.Shared.Messages.Dashboard;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using TrakiLibrary.Interfaces;
@@ -12,7 +13,7 @@ using TrakiLibrary.Models;
 
 namespace Core.ViewModels
 {
-    public partial class SharedHeaderViewModel : ObservableObject
+    public partial class SharedHeaderViewModel : ObservableObject, IRecipient<BudgetChangedMessage>
     {
         #region Private Variable
         private bool _isInitializing;
@@ -88,20 +89,7 @@ namespace Core.ViewModels
             {
                 if (SelectedAccount != null && SelectedAccount.Id == 0)
                    await this.LoadAccountsAsync(-1);
-                var filterState = new FilterState
-                {
-                    SelectedFilterOption = selectedFilterOption,
-                    SelectedAccount = SelectedAccount,
-
-                    SelectedMonth = SelectedMonth,
-                    SelectedWeek = SelectedWeek,
-                    SelectedYear = SelectedYear,
-                    FromDate = FromDate,
-                    ToDate = ToDate,
-                    OnDate = OnDate,
-                };
-                // Notify the client
-                PublishFilterChanged(filterState);
+                this.NotifyFilterChanged();
             }
 
             IsDateFilterSelected = value == FilterOption.ChooseDate;
@@ -123,6 +111,7 @@ namespace Core.ViewModels
             this._accountService = accountService;
             // Select the first value by default
             SelectedFilterOption = FilterOptions.First();
+            WeakReferenceMessenger.Default.Register<BudgetChangedMessage>(this);
         }
         #endregion Constructor
 
@@ -137,7 +126,7 @@ namespace Core.ViewModels
         private void PublishFilterChanged(FilterState filterState)
         {
             //WeakReferenceMessenger.Default.Send(new FilterChangedMessage(filterState));
-            StrongReferenceMessenger.Default.Send(new FilterChangedMessage((filterState)));
+            WeakReferenceMessenger.Default.Send(new FilterChangedMessage(filterState));
         }
 
         #endregion Private Methods
@@ -165,17 +154,33 @@ namespace Core.ViewModels
                 {
                     SelectedAccount = lstAccount.FirstOrDefault(a => a.Id == -1);
                 }
-
+                NotifyFilterChanged();
                 _isInitializing = false;
             }
         }
-
-
-        public void UnregisterMessenger()
+        private void NotifyFilterChanged()
         {
-            StrongReferenceMessenger.Default.UnregisterAll(this);
+            var filterState = new FilterState
+            {
+                SelectedFilterOption = SelectedFilterOption,
+                SelectedAccount = SelectedAccount,
+                SelectedMonth = SelectedMonth,
+                SelectedWeek = SelectedWeek,
+                SelectedYear = SelectedYear,
+                FromDate = FromDate,
+                ToDate = ToDate,
+                OnDate = OnDate,
+            };
+            PublishFilterChanged(filterState);
         }
 
+        public async void Receive(BudgetChangedMessage message)
+        {
+            //bool flag = message.Value;
+            await this.LoadAccountsAsync(0);
+            // this._isInitializing = false;
+            this.NotifyFilterChanged();
+        }
         #endregion Public Methods
 
         #region Events
@@ -194,18 +199,7 @@ namespace Core.ViewModels
                     return; // Early return to avoid publishing filter unnecessarily
                 }
 
-                var filterState = new FilterState
-                {
-                    SelectedFilterOption = selectedFilterOption,
-                    SelectedAccount = SelectedAccount,
-                    SelectedMonth = SelectedMonth,
-                    SelectedWeek = SelectedWeek,
-                    SelectedYear = SelectedYear,
-                    FromDate = FromDate,
-                    ToDate = ToDate,
-                    OnDate = OnDate,
-                };
-                PublishFilterChanged(filterState);
+               
             }
         }
 
@@ -216,19 +210,8 @@ namespace Core.ViewModels
         [RelayCommand]
         public void FilterTransactions()
         {
-                var filterState = new FilterState
-                {
-                    SelectedFilterOption = this.SelectedFilterOption,
-                    SelectedAccount = SelectedAccount,
-                    SelectedWeek = SelectedWeek,
-                    SelectedYear = SelectedYear,
+            this.NotifyFilterChanged();
 
-                    SelectedMonth = SelectedMonth,
-                    FromDate = FromDate,
-                    ToDate = ToDate,
-                    OnDate = OnDate,
-                };
-                PublishFilterChanged(filterState);
             //FilterTransactionsByRange(startOfWeek, endOfWeek);
         }
         #endregion

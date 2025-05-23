@@ -1,38 +1,17 @@
-﻿using SQLite;
-using TrakiLibrary.Interfaces;
+﻿using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
 
 namespace Traki.Service
 {
-
-    public class AccountService : IAccountService
+    public class AccountService : BaseService, IAccountService
     {
-        private readonly SQLiteAsyncConnection _database;
-        private bool _isInitialized = false;
-        private readonly SemaphoreSlim _initLock = new(1, 1); // Thread-safe initialization
-
-        public AccountService(string dbPath)
+        public AccountService(BudgetContextService budgetContextService) : base(budgetContextService)
         {
-            _database = new SQLiteAsyncConnection(dbPath);
         }
 
-        private async Task EnsureInitializedAsync()
+        protected override IEnumerable<Type> GetEntityTypes()
         {
-            if (_isInitialized) return;
-
-            await _initLock.WaitAsync();
-            try
-            {
-                if (!_isInitialized)
-                {
-                    await _database.CreateTableAsync<Account>();
-                    _isInitialized = true;
-                }
-            }
-            finally
-            {
-                _initLock.Release();
-            }
+            return new[] { typeof(Account) };
         }
 
         public async Task<List<Account>> GetAccountsAsync()
@@ -44,29 +23,29 @@ namespace Traki.Service
         public async Task<List<Account>?> GetAccountByAccountIdAsync(int id)
         {
             await EnsureInitializedAsync();
-            return await _database.Table<Account>()
-                                  .Where(t => t.Id == id).ToListAsync();
+            return await _database.Table<Account>().Where(t => t.Id == id).ToListAsync();
         }
 
         public async Task<Account> GetAccountByAccountNameAsync(string accountName)
         {
             await EnsureInitializedAsync();
             return await _database.Table<Account>()
-                                  .Where(t => t.Name == accountName).FirstOrDefaultAsync();
+                                  .Where(t => t.Name == accountName)
+                                  .FirstOrDefaultAsync();
         }
 
         public async Task<Account> AddAccountAsync(Account account)
         {
-            await EnsureInitializedAsync(); // Critical to prevent hanging
+            await EnsureInitializedAsync();
 
-            var existingAccount = _database.Table<Account>()
+            var existingAccount = await _database.Table<Account>()
                                                  .Where(a => a.Name == account.Name)
-                                                 .FirstOrDefaultAsync().Result;
+                                                 .FirstOrDefaultAsync();
 
             if (existingAccount != null)
                 return existingAccount;
 
-            var t = _database.InsertAsync(account).Result;
+            await _database.InsertAsync(account);
             return account;
         }
 
@@ -80,11 +59,6 @@ namespace Traki.Service
         {
             await EnsureInitializedAsync();
             await _database.UpdateAsync(account);
-        }
-
-        public async Task InitializeAsync()
-        {
-            await _database.CreateTableAsync<Account>();
         }
     }
 }
