@@ -1,5 +1,6 @@
 ﻿using Core.Pages;
 using Core.ViewModels;
+using Core.ViewModels.PageViewModel;
 using Core.Views;
 using Traki.Pages;
 using Traki.Service;
@@ -40,6 +41,7 @@ namespace Traki.Droid
             // Register pages with viewmodels
             RegisterPageWithViewModel<SharedHeaderViewModel, SharedHeaderView>(builder);
             RegisterPageWithViewModel<ManageAccountsViewModel, ManageAccountsPage>(builder);
+            RegisterPageWithViewModel<ManageCategoriesViewModel, ManageCategoriesPage>(builder);
             RegisterPageWithViewModel<ExcelUploaderViewModel, ExcelUploaderPage>(builder);
             RegisterPageWithViewModel<TransactionViewModel, TransactionPage>(builder);
             RegisterPageWithViewModel<DetailedTransactionsViewModel, DetailedTransactionsView>(builder);

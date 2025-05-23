@@ -5,12 +5,14 @@ namespace Traki.Service
 {
     public class CategoryService : BaseService, ICategoryService
     {
-        private bool _isInitialized = false;
-        private readonly SemaphoreSlim _initLock = new(1, 1);
-
         public CategoryService(BudgetContextService budgetContextService) : base(budgetContextService)
         {
  
+        }
+
+        protected override IEnumerable<Type> GetEntityTypes()
+        {
+            return new[] { typeof(Account) };
         }
 
         public async Task<List<Category>> GetCategoriesAsync()
@@ -49,30 +51,6 @@ namespace Traki.Service
         {
             await EnsureInitializedAsync();
             await _database.UpdateAsync(category);
-        }
-
-        protected async override Task? EnsureInitializedAsync()
-        {
-            if (_isInitialized) return;
-
-            await _initLock.WaitAsync();
-            try
-            {
-                var newDbPath = _budgetContextService.CurrentDbPath;
-
-                if (_currentDbPath != newDbPath || !_isInitialized)
-                {
-                    InitializeDatabase(newDbPath);
-                    _currentDbPath = newDbPath;
-
-                    await _database.CreateTableAsync<Category>();
-                    _isInitialized = true;
-                }
-            }
-            finally
-            {
-                _initLock.Release();
-            }
         }
     }
 }

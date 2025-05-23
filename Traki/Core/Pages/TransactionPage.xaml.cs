@@ -10,15 +10,14 @@ namespace Core.Pages;
 public partial class TransactionPage : ContentPage
 {
     #region Private Variables
-    private TransactionViewModel? _transactionViewModel;
     private TransactionByCategory? _transactionByCategory;
     private ICategoryService? _categoryService;
     #endregion Private Variables
+
     #region Constructor
     public TransactionPage(TransactionViewModel? transactionViewModel, ICategoryService categoryService)
     {
 		InitializeComponent();
-        _transactionViewModel = transactionViewModel;
         BindingContext = transactionViewModel;
         this._categoryService = categoryService;
 	}
@@ -73,14 +72,17 @@ public partial class TransactionPage : ContentPage
 
                 if (_categoryService != null && this.TransactionByCategory.CategoryId != null)
                 {
-                    var category = await _categoryService.GetCategoryByIdAsync(this.TransactionByCategory.CategoryId.Value);
-                    var matchedCategory = transactionViewModel.ListOfCategories
-                        .FirstOrDefault(c => c.Id == category.Id);
+                    var category = await _categoryService.GetCategoryByIdAsync(this.TransactionByCategory.CategoryId!.Value);
 
-                    transactionViewModel.SelectedCategory = matchedCategory;
+                    if (category != null && transactionViewModel.ListOfCategories != null)
+                    {
+                        var matchedCategory = transactionViewModel.ListOfCategories
+                            .FirstOrDefault(c => c.Id == category.Id);
+
+                        // Use matchedCategory safely here
+                        transactionViewModel.SelectedCategory = matchedCategory;
+                    }
                 }
-
-
 
                 // Load categories and set the selected category
                 await transactionViewModel.LoadAccountsAsync(TransactionByCategory.Id);

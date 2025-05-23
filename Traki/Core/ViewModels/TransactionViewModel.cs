@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Core.Enum;
+using Core.Pages;
 using System.Collections.ObjectModel;
 using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
@@ -93,14 +94,14 @@ namespace Core.ViewModels
         {
             if (value != null && value.Name == "Add New Category")
             {
-                //Shell.Current.GoToAsync(nameof(ManageCategoriesPage));
+                Shell.Current.GoToAsync(nameof(ManageCategoriesPage));
             }
         }
         partial void OnSelectedAccountChanged(Account value)
         {
             if (value != null && value.Name == "Add New Account")
             {
-                //Shell.Current.GoToAsync(nameof(ManageAccountsPage));
+               //Shell.Current.GoToAsync(nameof(ManageAccountsPage));
             }
         }
         #endregion Events
@@ -120,22 +121,26 @@ namespace Core.ViewModels
                 TransactionDate = DateTime.Now
             };
 
-            try
+            var currentPage = Application.Current?.Windows[0]?.Page;
+            if (currentPage != null)
             {
-                if (_transactionByCategoryService != null)
+                try
                 {
-                    if (transactionByCategory == null || transactionByCategory.Id == 0)
-                        await _transactionByCategoryService.AddTransactionAsync(transactionByCategory);
-                    else
-                        await _transactionByCategoryService.UpdateTransactionAsync(transactionByCategory);
+                    if (_transactionByCategoryService != null)
+                    {
+                        if (transactionByCategory == null || transactionByCategory.Id == 0)
+                            await _transactionByCategoryService.AddTransactionAsync(transactionByCategory);
+                        else
+                            await _transactionByCategoryService.UpdateTransactionAsync(transactionByCategory);
 
-                    ResetTransactionForm();
-                    await Application.Current.MainPage.DisplayAlert("Success", "Transaction saved successfully.", "OK");
+                        ResetTransactionForm();
+                        await currentPage.DisplayAlert("Success", "Transaction saved successfully.", "OK");
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                catch (Exception ex)
+                {
+                    await currentPage.DisplayAlert("Error", ex.Message, "OK");
+                }
             }
         }
         #endregion Commands

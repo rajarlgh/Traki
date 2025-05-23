@@ -248,22 +248,26 @@ namespace Traki.ViewModels
         [RelayCommand]
         private async Task CreateNewBudget()
         {
-            var result = await Application.Current.MainPage.DisplayPromptAsync("New Budget", "Enter budget name:");
-            if (string.IsNullOrWhiteSpace(result)) return;
-
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, $"expenses_{result}.db");
-
-            if (!File.Exists(dbPath))
+            var currentPage = Application.Current?.Windows[0]?.Page;
+            if (currentPage != null)
             {
-                File.Create(dbPath).Close(); // Ensure file exists
-                AvailableBudgets.Add(result);
-                SelectedBudget = result;
+                var result = await currentPage.DisplayPromptAsync("New Budget", "Enter budget name:");
+                if (string.IsNullOrWhiteSpace(result)) return;
+
+                var dbPath = Path.Combine(FileSystem.AppDataDirectory, $"expenses_{result}.db");
+
+                if (!File.Exists(dbPath))
+                {
+                    File.Create(dbPath).Close(); // Ensure file exists
+                    AvailableBudgets.Add(result);
+                    SelectedBudget = result;
+                }
+                else
+                {
+                    await currentPage.DisplayAlert("Exists", "Budget already exists.", "OK");
+                }
+                this.PublishFilterChanged(true);
             }
-            else
-            {
-                await Application.Current.MainPage.DisplayAlert("Exists", "Budget already exists.", "OK");
-            }
-            this.PublishFilterChanged(true);
         }
 
         partial void OnSelectedBudgetChanged(string value)
