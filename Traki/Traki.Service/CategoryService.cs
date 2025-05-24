@@ -12,7 +12,7 @@ namespace Traki.Service
 
         protected override IEnumerable<Type> GetEntityTypes()
         {
-            return new[] { typeof(Account) };
+            return new[] { typeof(Category) };
         }
 
         public async Task<List<Category>> GetCategoriesAsync()

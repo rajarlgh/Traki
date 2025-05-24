@@ -61,47 +61,82 @@ namespace Core.ViewModels
         #endregion Property
 
         #region Public Methods
-        public async Task LoadCategoriesAsync(Category selectedCategory)
+        public async Task LoadCategoriesAsync(Category? selectedCategory)
         {
-            var categories = await _categoryService.GetCategoriesAsync();
-            categories = categories.Where(c => c.Type == selectedType.ToString()).ToList();
-            ListOfCategories = new ObservableCollection<Category>(categories);
-            ListOfCategories.Add(new Category { Id = -1, Name = "Add New Category" });
-
-            if (selectedCategory != null && ListOfCategories != null && ListOfCategories.Count>0)
+            if (_categoryService != null)
             {
-                SelectedCategory = ListOfCategories.FirstOrDefault(c => c.Id == selectedCategory.Id);
+                var categories = await _categoryService.GetCategoriesAsync();
+
+                // Filter categories by selectedType
+                categories = categories.Where(c => c.Type == this.SelectedType.ToString()).ToList();
+
+                // Create a new list with "Add New Category" inserted at the top
+                var list = new List<Category>(categories);
+                list.Insert(0, new Category { Id = -1, Name = "Add New Category" });
+
+                ListOfCategories = new ObservableCollection<Category>(list);
+
+                if (selectedCategory != null && selectedCategory.Id != 0 && ListOfCategories.Any())
+                {
+                    var matchedCategory = ListOfCategories.FirstOrDefault(c => c.Id == selectedCategory.Id);
+                    if (matchedCategory != null)
+                    {
+                        SelectedCategory = matchedCategory;
+                    }
+                    else
+                    {
+                        SelectedCategory = null;
+                    }
+                }
+                else
+                {
+                    SelectedCategory = null; // or keep default if needed
+                }
             }
         }
+
 
         public async Task LoadAccountsAsync(int? accountId)
         {
-
-            var accounts = await _accountService.GetAccountsAsync();
-            ListOfAccounts = new ObservableCollection<Account>(accounts);
-            ListOfAccounts.Add(new Account { Id = -1, Name = "Add New Account" });
-
-            var selectedAccount = accounts.FirstOrDefault(r => r.Id == accountId);
-            if (selectedAccount != null)
+            if (_accountService != null)
             {
-                SelectedAccount = ListOfAccounts.FirstOrDefault(a => a.Id == selectedAccount.Id);
+                var accounts = await _accountService.GetAccountsAsync();
+
+                var list = new List<Account>(accounts);
+                list.Insert(0, new Account { Id = -1, Name = "Add New Account" });
+                ListOfAccounts = new ObservableCollection<Account>(list);
+
+                if (accountId != null && accountId != 0)
+                {
+                    var selectedAccount = ListOfAccounts.FirstOrDefault(a => a.Id == accountId);
+                    if (selectedAccount != null)
+                    {
+                        SelectedAccount = selectedAccount;
+                    }
+                }
+                else
+                {
+                    SelectedAccount = null; // or whatever default you want
+                }
             }
         }
+
+
         #endregion Public Methods
 
         #region Events
-        partial void OnSelectedCategoryChanged(Category value)
+        partial void OnSelectedCategoryChanged(Category? value)
         {
             if (value != null && value.Name == "Add New Category")
             {
-                Shell.Current.GoToAsync(nameof(ManageCategoriesPage));
+                Shell.Current.GoToAsync($"{nameof(ManageCategoriesPage)}?transactionType={SelectedType}");
             }
         }
-        partial void OnSelectedAccountChanged(Account value)
+        partial void OnSelectedAccountChanged(Account? value)
         {
             if (value != null && value.Name == "Add New Account")
             {
-               //Shell.Current.GoToAsync(nameof(ManageAccountsPage));
+                Shell.Current.GoToAsync(nameof(ManageAccountsPage));
             }
         }
         #endregion Events
@@ -128,7 +163,7 @@ namespace Core.ViewModels
                 {
                     if (_transactionByCategoryService != null)
                     {
-                        if (transactionByCategory == null || transactionByCategory.Id == 0)
+                        if (transactionByCategory.Id == 0)
                             await _transactionByCategoryService.AddTransactionAsync(transactionByCategory);
                         else
                             await _transactionByCategoryService.UpdateTransactionAsync(transactionByCategory);

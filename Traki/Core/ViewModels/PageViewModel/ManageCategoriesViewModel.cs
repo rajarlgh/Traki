@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Core.Enum;
 using System.Collections.ObjectModel;
 using TrakiLibrary.Interfaces;
 using TrakiLibrary.Models;
@@ -32,8 +33,12 @@ namespace Core.ViewModels.PageViewModel
         }
         #endregion Constructor
 
+        #region Property
+        public TransactionType TransactionType { get; set; }
+        #endregion
+
         #region Public Methods
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(TransactionType transactionType)
         {
             var categories = await _categoryService.GetCategoriesAsync();
             this.ListOfCategories = new ObservableCollection<Category>();
@@ -46,6 +51,17 @@ namespace Core.ViewModels.PageViewModel
 
         #region Commands
         [RelayCommand]
+        public Task EditCategoryAsync(Category category)
+        {
+            if (category == null)
+                return Task.CompletedTask;
+
+            Id = category.Id;
+            this.NewCategory = category.Name ?? string.Empty;
+            return Task.CompletedTask;
+        }
+
+        [RelayCommand]
         private async Task AddCategoryAsync()
         {
             if (!string.IsNullOrWhiteSpace(this.NewCategory))
@@ -54,6 +70,7 @@ namespace Core.ViewModels.PageViewModel
                 {
                     Id = this.Id,
                     Name = this.NewCategory,
+                    Type = this.TransactionType.ToString()
                 };
 
                 var currentPage = Application.Current?.Windows[0]?.Page;

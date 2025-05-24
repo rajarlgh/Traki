@@ -89,7 +89,7 @@ public partial class TransactionPage : ContentPage
 
                 // Update other fields
                 transactionViewModel.TransactionText = "Edit Transaction";
-                transactionViewModel.Id = TransactionByCategory.Id;
+                //transactionViewModel.Id = TransactionByCategory.Id;
                 transactionViewModel.SelectedType = Type;
 
                 //if (_categoryService != null && this.Transaction.CategoryId != null)
