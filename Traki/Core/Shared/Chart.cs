@@ -124,8 +124,21 @@ namespace Core.Shared
                     }
                 }
             }
+            else
+            {
+                //transactionsByCategorys = transactionsByCategorys
+                //            .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate )
+                //            .ToList();
 
-            return (transactionsByCategorys, transactionsByAccounts ?? new List<TransactionByAccount>());
+                //if (transactionsByAccounts != null)
+                //{
+                //    transactionsByAccounts = transactionsByAccounts
+                //        .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
+                //        .ToList();
+                //}
+            }
+
+                return (transactionsByCategorys, transactionsByAccounts ?? new List<TransactionByAccount>());
         }
 
 

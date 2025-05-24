@@ -7,7 +7,7 @@
         <Picker Title="Type"
         ItemsSource="{Binding TransactionTypes}"
         SelectedItem="{Binding SelectedType}" 
-        IsEnabled="True"/>
+        IsEnabled="False"/>
 
         <!-- Category Picker -->
         <!--IsVisible="{Binding IsCategoryVisible}"-->
