@@ -41,11 +41,13 @@ namespace Core.ViewModels.PageViewModel
         public async Task InitializeAsync(TransactionType transactionType)
         {
             var categories = await _categoryService.GetCategoriesAsync();
+            categories = categories.Where( r=> r.Type == transactionType.ToString()).ToList();
             this.ListOfCategories = new ObservableCollection<Category>();
             foreach (var category in categories)
             {
                 this.ListOfCategories.Add(category);
             }
+            this.TransactionType = transactionType;
         }
         #endregion
 

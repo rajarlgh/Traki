@@ -15,12 +15,12 @@ public partial class ManageCategoriesPage : ContentPage
         this.BindingContext = viewModel;
     }
 
-    //protected override async void OnAppearing()
-    //{
-    //    base.OnAppearing();
-    //    if (ViewModel != null)
-    //        await ViewModel.InitializeAsync(this.TransactionType);
-    //}
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        if (ViewModel != null)
+            await ViewModel.InitializeAsync(this.TransactionType);
+    }
 
     #region Property
     private string? _transactionTypeString;

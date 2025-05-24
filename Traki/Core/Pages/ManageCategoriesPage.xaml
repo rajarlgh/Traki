@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Core.Pages.ManageCategoriesPage"
              xmlns:vm="clr-namespace:Core.ViewModels.PageViewModel"
-             Title="ManageCategoriesPage">
+             Title="Manage Categories">
     <VerticalStackLayout Padding="10">
         <!-- List of categories -->
         <CollectionView ItemsSource="{Binding ListOfCategories}" SelectionMode="None">

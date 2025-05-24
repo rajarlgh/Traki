@@ -12,10 +12,15 @@ namespace Traki.Service
 
         }
 
+        protected override IEnumerable<Type> GetEntityTypes()
+        {
+            return new[] { typeof(TransactionByCategory) };
+        }
+
         public async Task<List<TransactionByCategory>> GetTransactionsAsync()
         {
             await EnsureInitializedAsync();
-            return await _database.Table<TransactionByCategory>().ToListAsync();
+                return await _database.Table<TransactionByCategory>().ToListAsync();
         }
 
         public async Task<List<TransactionByCategory>> GetTransactionsByCategoryIdAsync(int categoryId)
@@ -44,28 +49,28 @@ namespace Traki.Service
             return await _database.DeleteAsync<TransactionByCategory>(id);
         }
 
-        protected async override Task? EnsureInitializedAsync()
-        {
-            if (_isInitialized) return;
+        //protected async override Task? EnsureInitializedAsync()
+        //{
+        //    if (_isInitialized) return;
 
-            await _initLock.WaitAsync();
-            try
-            {
-                var newDbPath = _budgetContextService.CurrentDbPath;
+        //    await _initLock.WaitAsync();
+        //    try
+        //    {
+        //        var newDbPath = _budgetContextService.CurrentDbPath;
 
-                if (_currentDbPath != newDbPath || !_isInitialized)
-                {
-                    InitializeDatabase(newDbPath);
-                    _currentDbPath = newDbPath;
+        //        if (_currentDbPath != newDbPath || !_isInitialized)
+        //        {
+        //            InitializeDatabase(newDbPath);
+        //            _currentDbPath = newDbPath;
 
-                    await _database.CreateTableAsync<TransactionByCategory>();
-                    _isInitialized = true;
-                }
-            }
-            finally
-            {
-                _initLock.Release();
-            }
-        }
+        //            await _database.CreateTableAsync<TransactionByCategory>();
+        //            _isInitialized = true;
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        _initLock.Release();
+        //    }
+        //}
     }
 }

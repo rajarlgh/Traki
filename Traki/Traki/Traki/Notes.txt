@@ -2,6 +2,8 @@ command to pull from emulator.
 ------------------------------
 adb pull /storage/emulated/0/Android/data/com.companyname.daytodaytransactions/files/expenses.db D:\Monefy\
 adb pull /storage/emulated/0/Android/data/com.companyname.traki/files/expenses.db D:\Monefy\
+adb shell "run-as com.companyname.traki cat /data/user/com.companyname.traki/files/expenses_t1.db" > D:\Monefy\expenses_t1.db
+/data/user/0/com.companyname.traki/files
 
 Push to emulator
 -----------------

@@ -120,7 +120,7 @@ namespace Core.ViewModels
         private async Task ToggleFilter()
         {
             IsFilterExpanded = !IsFilterExpanded;
-            await this.LoadAccountsAsync(0);
+           // await this.LoadAccountsAsync(0);
         }
 
         private void PublishFilterChanged(FilterState filterState)
@@ -199,7 +199,7 @@ namespace Core.ViewModels
                     return; // Early return to avoid publishing filter unnecessarily
                 }
 
-               
+                NotifyFilterChanged();
             }
         }
 

@@ -13,6 +13,11 @@ namespace Traki.Service
 
         }
 
+        protected override IEnumerable<Type> GetEntityTypes()
+        {
+            return new[] { typeof(TransactionByAccount) };
+        }
+
         public async Task<List<TransactionByAccount>> GetTransactionsAsync()
         {
             await EnsureInitializedAsync();
@@ -53,28 +58,28 @@ namespace Traki.Service
             return await _database.DeleteAsync<TransactionByAccount>(id);
         }
 
-        protected async override Task? EnsureInitializedAsync()
-        {
-            if (_isInitialized) return;
+        //protected async override Task? EnsureInitializedAsync()
+        //{
+        //    if (_isInitialized) return;
 
-            await _initLock.WaitAsync();
-            try
-            {
-                var newDbPath = _budgetContextService.CurrentDbPath;
+        //    await _initLock.WaitAsync();
+        //    try
+        //    {
+        //        var newDbPath = _budgetContextService.CurrentDbPath;
 
-                if (_currentDbPath != newDbPath || !_isInitialized)
-                {
-                    InitializeDatabase(newDbPath);
-                    _currentDbPath = newDbPath;
+        //        if (_currentDbPath != newDbPath || !_isInitialized)
+        //        {
+        //            InitializeDatabase(newDbPath);
+        //            _currentDbPath = newDbPath;
 
-                    await _database.CreateTableAsync<TransactionByAccount>();
-                    _isInitialized = true;
-                }
-            }
-            finally
-            {
-                _initLock.Release();
-            }
-        }
+        //            await _database.CreateTableAsync<TransactionByAccount>();
+        //            _isInitialized = true;
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        _initLock.Release();
+        //    }
+        //}
     }
 }

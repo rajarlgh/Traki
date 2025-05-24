@@ -136,7 +136,7 @@ namespace Core.ViewModels
         {
             if (value != null && value.Name == "Add New Account")
             {
-                Shell.Current.GoToAsync(nameof(ManageAccountsPage));
+                Shell.Current.GoToAsync($"{nameof(ManageAccountsPage)}?transactionType = {SelectedType}");
             }
         }
         #endregion Events
@@ -147,11 +147,12 @@ namespace Core.ViewModels
         {
             var transactionByCategory = new TransactionByCategory
             {
-                Id = Id??0,
+                Id = Id ?? 0,
                 Amount = Amount,
                 Reason = Reason,
                 Type = this.SelectedType.ToString(),
                 Category = SelectedCategory,
+                CategoryId = SelectedCategory?.Id,
                 SourceAccountId = SelectedAccount?.Id ?? 0,
                 TransactionDate = DateTime.Now
             };

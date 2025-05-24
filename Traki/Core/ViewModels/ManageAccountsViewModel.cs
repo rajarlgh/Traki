@@ -8,6 +8,7 @@ namespace Core.ViewModels
 {
     public partial class ManageAccountsViewModel : ObservableObject
     {
+        #region Private Variables
         private readonly IAccountService _accountService;
 
 #pragma warning disable
@@ -20,12 +21,18 @@ namespace Core.ViewModels
         [ObservableProperty]
         private int? accountId;
 #pragma warning restore
+
+        #endregion Private Variables
+
+        #region Constructor
         public ManageAccountsViewModel(IAccountService accountService)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _ = LoadAccountsAsync(); // Run async method safely without warning
         }
+        #endregion Constructor
 
+        #region Private Methods
         private static Page? GetCurrentPage() =>
             Application.Current?.Windows.FirstOrDefault()?.Page;
 
@@ -38,6 +45,9 @@ namespace Core.ViewModels
             }
         }
 
+        #endregion Private Methods
+
+        #region Commands
         [RelayCommand]
         public async Task LoadAccountsAsync()
         {
@@ -146,5 +156,20 @@ namespace Core.ViewModels
                 }
             }
         }
+        #endregion Commmands
+
+        #region Public Methods
+        //public async Task InitializeAsync(TransactionType transactionType)
+        //{
+            //var accounts = await _accountService.GetAccountsAsync();
+            //accounts = accounts.Where(r => r == transactionType.ToString()).ToList();
+            //this.ListOfCategories = new ObservableCollection<Category>();
+            //foreach (var category in accounts)
+            //{
+            //    this.ListOfCategories.Add(category);
+            //}
+            //this.TransactionType = transactionType;
+        //}
+        #endregion
     }
 }
