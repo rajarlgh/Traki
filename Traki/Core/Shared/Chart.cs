@@ -62,10 +62,14 @@ namespace Core.Shared
                     .ToList();
             }
 
-            if (filterOption != FilterOption.All)
+            //if (filterOption != FilterOption.All)
+            //{
+            if (selectedAccountId > 0)
             {
-                if (selectedAccountId > 0)
+                if (filterOption == FilterOption.Month)
                 {
+
+                }
                     if (isForCarryForward)
                     {
                         transactionsByCategorys = transactionsByCategorys
@@ -75,7 +79,7 @@ namespace Core.Shared
                         if (transactionsByAccounts != null)
                         {
                             transactionsByAccounts = transactionsByAccounts
-                                .Where(t => t.TransactionDate < fromDate)
+                                .Where(t => t.TransactionDate < fromDate && (t.SourceAccountId == selectedAccountId || t.DestinationAccountId == selectedAccountId))
                                 .ToList();
                         }
                     }
@@ -89,7 +93,8 @@ namespace Core.Shared
                         if (transactionsByAccounts != null)
                         {
                             transactionsByAccounts = transactionsByAccounts
-                                .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
+                                .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate &&
+                                        (t.SourceAccountId == selectedAccountId || t.DestinationAccountId == selectedAccountId))
                                 .ToList();
                         }
                     }
@@ -123,20 +128,20 @@ namespace Core.Shared
                         }
                     }
                 }
-            }
-            else
-            {
-                //transactionsByCategorys = transactionsByCategorys
-                //            .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate )
-                //            .ToList();
+            //}
+            //else
+            //{
+            //    //transactionsByCategorys = transactionsByCategorys
+            //    //            .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate )
+            //    //            .ToList();
 
-                //if (transactionsByAccounts != null)
-                //{
-                //    transactionsByAccounts = transactionsByAccounts
-                //        .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
-                //        .ToList();
-                //}
-            }
+            //    //if (transactionsByAccounts != null)
+            //    //{
+            //    //    transactionsByAccounts = transactionsByAccounts
+            //    //        .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate)
+            //    //        .ToList();
+            //    //}
+            //}
 
                 return (transactionsByCategorys, transactionsByAccounts ?? new List<TransactionByAccount>());
         }

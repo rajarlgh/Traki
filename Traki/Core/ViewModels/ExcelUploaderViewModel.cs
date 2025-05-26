@@ -168,6 +168,8 @@ namespace Core.ViewModels
 
         private async Task ReadCsv(string filePath)
         {
+            transactionByCategorys = new List<TransactionByCategory>();
+            transactionByAccounts = new List<TransactionByAccount>();
             if (!File.Exists(filePath))
                 throw new FileNotFoundException("File not found", filePath);
 
@@ -366,6 +368,7 @@ namespace Core.ViewModels
         CategoryName,
         Amount,
         Currency,
+        ConvertedAmount,
         ConvertedCurrency,
         Description
     }

@@ -27,6 +27,7 @@
                     Grid.Column="1" />
 
             <Label Text="Balance:"
+                   IsVisible="{Binding ShowBalance}"
                    Grid.Column="2"
                    FontSize="16"
                    FontAttributes="Bold"
@@ -34,6 +35,7 @@
                    VerticalTextAlignment="Center" />
 
             <Label Text="{Binding Balance}"
+                   IsVisible="{Binding ShowBalance}"
                    Grid.Column="3"
                    FontSize="16"
                    FontAttributes="Bold"
