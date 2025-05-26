@@ -1,101 +1,163 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Traki.Pages.DashboardPage"
              xmlns:coreControls="clr-namespace:Core.Views;assembly=Core"
+             x:Class="Traki.Pages.DashboardPage"
              Title="Dashboard">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Padding="10" RowSpacing="10">
+    <ScrollView>
+        <VerticalStackLayout Padding="15" Spacing="20">
 
-        <!-- HEADER -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="15">
-            <Button Text="Upload"
-                    Command="{Binding UploadExcelCommand}"
-                    Style="{StaticResource OutlineButtonStyle}"
-                    WidthRequest="80"
-                    CornerRadius="20"
-                    BorderColor="Orange"
-                    TextColor="Orange" />
+            <!-- Top Action Row with Balance -->
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto"
+                  ColumnSpacing="15"
+                  VerticalOptions="Center">
 
-            <Button Text="Download"
-                    Command="{Binding DownloadExcelCommand}"
-                    Style="{StaticResource OutlineButtonStyle}"
-                    WidthRequest="100"
-                    CornerRadius="20"
-                    BorderColor="Blue"
-                    TextColor="Yellow"
-                    Grid.Column="1" />
+                <Button Text="Upload"
+                        Command="{Binding UploadExcelCommand}"
+                        WidthRequest="90"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        BackgroundColor="Transparent"
+                        BorderColor="Orange"
+                        BorderWidth="1"
+                        TextColor="Orange" />
 
-            <Label Text="Balance:"
-                   IsVisible="{Binding ShowBalance}"
-                   Grid.Column="2"
-                   FontSize="16"
-                   FontAttributes="Bold"
-                   HorizontalTextAlignment="End"
-                   VerticalTextAlignment="Center" />
+                <Button Text="Download"
+                        Command="{Binding DownloadExcelCommand}"
+                        WidthRequest="100"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        BackgroundColor="Transparent"
+                        BorderColor="Blue"
+                        BorderWidth="1"
+                        TextColor="Blue"
+                        Grid.Column="1" />
 
-            <Label Text="{Binding Balance}"
-                   IsVisible="{Binding ShowBalance}"
-                   Grid.Column="3"
-                   FontSize="16"
-                   FontAttributes="Bold"
-                   TextColor="Green"
-                   VerticalTextAlignment="Center" />
-        </Grid>
+                <Label Text="Balance:"
+                       IsVisible="{Binding ShowBalance}"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Grid.Column="2" />
 
-        <!-- Filter / Header -->
-        <VerticalStackLayout Grid.Row="1" Spacing="5">
+                <Label Text="{Binding Balance}"
+                       IsVisible="{Binding ShowBalance}"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="Green"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       Grid.Column="3" />
+            </Grid>
+
+            <!-- Budget Section -->
+            <Border Stroke="LightGray" StrokeThickness="1" Padding="15" StrokeShape="RoundRectangle 12">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Select Budget" FontAttributes="Bold" FontSize="16"/>
+                    <Picker ItemsSource="{Binding AvailableBudgets}"
+                            SelectedItem="{Binding SelectedBudget}"
+                            Title="Choose a budget" />
+                    <Button Text="Create New Budget"
+                            Command="{Binding CreateNewBudgetCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Filter Section -->
             <coreControls:SharedHeaderView x:Name="SharedHeaderControl" />
-            <VerticalStackLayout Padding="20" Spacing="10">
-                <Label Text="Select Budget" FontAttributes="Bold" />
-                <Picker ItemsSource="{Binding AvailableBudgets}"
-                SelectedItem="{Binding SelectedBudget}"
-                Title="Choose a budget" />
 
-                <Button Text="Create New Budget"
-                Command="{Binding CreateNewBudgetCommand}" />
+            <!-- Tab Content -->
+            <Border Stroke="LightGray" StrokeThickness="1" Padding="10" StrokeShape="RoundRectangle 12">
+                <ContentView Content="{Binding SelectedTabView}" />
+            </Border>
 
-                <!-- Your existing dashboard content below -->
-            </VerticalStackLayout>
+            <!-- Action Buttons: Income / Expense -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="30" Padding="0,10">
+
+                <!-- Income -->
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <ImageButton Source="salary.png"
+                     Command="{Binding ShowIncomeCommand}"
+                     WidthRequest="50"
+                     HeightRequest="50"
+                     BackgroundColor="Transparent"
+                     ToolTipProperties.Text="View Income"/>
+                    <Label Text="Income"
+               FontSize="12"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center"
+               TextColor="#4CAF50" />
+                </VerticalStackLayout>
+
+                <!-- Expense -->
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <ImageButton Source="expenses.png"
+                     Command="{Binding ShowExpenseCommand}"
+                     WidthRequest="50"
+                     HeightRequest="50"
+                     BackgroundColor="Transparent"
+                     ToolTipProperties.Text="View Expense"/>
+                    <Label Text="Expense"
+               FontSize="12"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center"
+               TextColor="#F44336" />
+                </VerticalStackLayout>
+
+            </HorizontalStackLayout>
+
+            <!-- Action Buttons: Deposit / Withdraw / Transfer -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="30" Padding="0,10">
+
+                <!-- Deposit -->
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <ImageButton Source="deposit.png"
+                     Command="{Binding AddMoneyClickedCommand}"
+                     WidthRequest="50"
+                     HeightRequest="50"
+                     BackgroundColor="Transparent"
+                     ToolTipProperties.Text="Deposit Funds"/>
+                    <Label Text="Deposit"
+               FontSize="12"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center"
+               TextColor="#2E7D32" />
+                </VerticalStackLayout>
+
+                <!-- Withdraw -->
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <ImageButton Source="cashwithdrawal.png"
+                     Command="{Binding WidthDrawMoneyClickedCommand}"
+                     WidthRequest="50"
+                     HeightRequest="50"
+                     BackgroundColor="Transparent"
+                     ToolTipProperties.Text="Withdraw Funds"/>
+                    <Label Text="Withdraw"
+               FontSize="12"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center"
+               TextColor="#D32F2F" />
+                </VerticalStackLayout>
+
+                <!-- Transfer -->
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <ImageButton Source="moneytransfer.png"
+                     Command="{Binding TransferMoneyClickedCommand}"
+                     WidthRequest="50"
+                     HeightRequest="50"
+                     BackgroundColor="Transparent"
+                     ToolTipProperties.Text="Transfer Funds"/>
+                    <Label Text="Transfer"
+               FontSize="12"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center"
+               TextColor="#1976D2" />
+                </VerticalStackLayout>
+
+            </HorizontalStackLayout>
+
+
+
         </VerticalStackLayout>
-
-        <!-- Scrollable Dynamic Content -->
-        <ScrollView Grid.Row="2">
-            <ContentView Content="{Binding SelectedTabView}" />
-        </ScrollView>
-
-        <!-- Tabs -->
-        <HorizontalStackLayout Grid.Row="3" HorizontalOptions="Center" Spacing="20" Padding="0,10">
-            <Button Text="Income"
-                    Command="{Binding ShowIncomeCommand}"
-                    BackgroundColor="LightGreen"
-                    TextColor="White"
-                    CornerRadius="20"
-                    WidthRequest="100" />
-
-            <Button Text="Expense"
-                    Command="{Binding ShowExpenseCommand}"
-                    BackgroundColor="LightCoral"
-                    TextColor="White"
-                    CornerRadius="20"
-                    WidthRequest="100" />
-        </HorizontalStackLayout>
-
-        <!-- Footer Buttons -->
-        <HorizontalStackLayout Grid.Row="4" Spacing="20" HorizontalOptions="Center">
-            <Button Text="Deposit"
-                    Command="{Binding AddMoneyClickedCommand}"
-                    WidthRequest="120"
-                    BackgroundColor="Green"
-                    TextColor="White"
-                    CornerRadius="20" />
-
-            <Button Text="Withdraw"
-                    Command="{Binding WidthDrawMoneyClickedCommand}"
-                    WidthRequest="120"
-                    BackgroundColor="Red"
-                    TextColor="White"
-                    CornerRadius="20" />
-        </HorizontalStackLayout>
-    </Grid>
+    </ScrollView>
 </ContentPage>

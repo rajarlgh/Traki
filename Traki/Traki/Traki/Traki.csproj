@@ -27,7 +27,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiImage Remove="Resources\Images\money-transfer.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <MauiXaml Remove="Pages\ExcelUploaderPage.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Images\money-transfer.png" />
   </ItemGroup>
 
   <ItemGroup>
